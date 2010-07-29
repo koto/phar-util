@@ -1,0 +1,15 @@
+/**
+ * This file is part of the Remote-Phar library.
+ * @author Krzysztof Kotowicz <kkotowicz at gmail dot com>
+ * @package remote-phar
+ */
+
+
+Here the two files with private/public key should be stored. Using these files you will sign/verify your code.
+
+To generate these files, you need an OpenSSL installation.
+
+Example - to generate these files in Linux, you should execute the following commands:
+
+$ openssl genrsa -out priv.pem 1024
+$ openssl rsa -in priv.pem -pubout -out pub.pem
