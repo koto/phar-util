@@ -1,4 +1,7 @@
 <?php
+
+require_once 'SignatureVerificationException.php';
+
 /**
  * Downloads remote signed Phar archives to local directory and assigns
  * them local public key file used to verify code signature.
@@ -26,7 +29,6 @@
  * @author Krzysztof Kotowicz <kkotowicz at gmail dot com>
  * @package remote-phar
  */
-
 class RemotePharDownloader {
 
     /**
@@ -59,7 +61,7 @@ class RemotePharDownloader {
      * @param string $phar_path Phar archive URI (file path, url, ...)
      * @param bool $overwrite should we overwrite already present local file?
      * @throws RuntimeException
-     * @throws UnexpectedValueException
+     * @throws SignatureVerificationException
      */
     public function download($phar_path, $overwrite = false) {
         $this->assertValidPharURI($phar_path);
@@ -78,16 +80,33 @@ class RemotePharDownloader {
                     throw new RuntimeException("Error copying public key file!");
                 }
 
-                $phar = new Phar($local_path); // here the verification happens
-                $sig = $phar->getSignature();
-                unset($phar);
-                if ($sig['hash_type'] !== 'OpenSSL')
-                    throw new RuntimeException("Downloaded '$phar_path' is not signed with OpenSSL!");
+                try {
+                    // When public key is invalid, openssl throws a
+                    // 'supplied key param cannot be coerced into a public key' warning
+                    // and phar ignores sig verification.
+                    // We need to protect from that by catching the warning
+                    set_error_handler(array($this, 'throwException'));
+                    $phar = new Phar($local_path); // here the verification happens
+                    restore_error_handler();
+                    $sig = $phar->getSignature();
+                    unset($phar);
+                    if ($sig['hash_type'] !== 'OpenSSL') {
+                        throw new SignatureVerificationException("Downloaded '$phar_path' is not signed with OpenSSL!");
+                    }
+                } catch (UnexpectedValueException $e) {
+                    throw new SignatureVerificationException($e->getMessage());
+                } catch (RuntimeException $e) {
+                    throw new SignatureVerificationException($e->getMessage());
+                }
 
             }
         }
 
         return $local_path;
+    }
+
+    public function throwException($errno, $errstr) {
+        throw new RuntimeException($errstr);
     }
 
     /**
