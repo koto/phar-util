@@ -31,6 +31,7 @@ require_once 'SignatureVerificationException.php';
  */
 class RemotePharDownloader {
 
+    const PHAR_FILENAME_REGEX = '#\.phar(\..*|$)#';
     /**
      * @var string $tmp_dir Temporary directory for downloaded code
      */
@@ -65,41 +66,27 @@ class RemotePharDownloader {
      */
     public function download($phar_path, $overwrite = false) {
         $this->assertValidPharURI($phar_path);
-        $local_path = $this->getLocalPath($path);
+        $local_path = $this->getLocalPath($phar_path);
 
-        if (!file_exists($local_path) || $overwrite) {
-            // copy phar
-            if (!copy($phar_path, $local_path)) {
-                throw new RuntimeException("Error downloading file '$phar_path'!");
+        if (file_exists($local_path)) {
+            if ($overwrite) {
+                $this->delete($phar_path);
+            } else {
+                return $local_path;
             }
+        }
 
-            // copy pubkey
-            if ($this->pub_key_file) {
+        // copy phar
+        if (!copy($phar_path, $local_path)) {
+            throw new RuntimeException("Error downloading file '$phar_path'!");
+        }
 
-                if (!copy($this->pub_key_file, $local_path . '.pubkey')) {
-                    throw new RuntimeException("Error copying public key file!");
-                }
-
-                try {
-                    // When public key is invalid, openssl throws a
-                    // 'supplied key param cannot be coerced into a public key' warning
-                    // and phar ignores sig verification.
-                    // We need to protect from that by catching the warning
-                    set_error_handler(array($this, 'throwException'));
-                    $phar = new Phar($local_path); // here the verification happens
-                    restore_error_handler();
-                    $sig = $phar->getSignature();
-                    unset($phar);
-                    if ($sig['hash_type'] !== 'OpenSSL') {
-                        throw new SignatureVerificationException("Downloaded '$phar_path' is not signed with OpenSSL!");
-                    }
-                } catch (UnexpectedValueException $e) {
-                    throw new SignatureVerificationException($e->getMessage());
-                } catch (RuntimeException $e) {
-                    throw new SignatureVerificationException($e->getMessage());
-                }
-
+        // copy pubkey
+        if ($this->pub_key_file) {
+            if (!copy($this->pub_key_file, $this->getPubkeyFilename($local_path))) {
+                throw new RuntimeException("Error copying public key file!");
             }
+            $this->verifyPharSignature($local_path, $phar_path);
         }
 
         return $local_path;
@@ -107,6 +94,37 @@ class RemotePharDownloader {
 
     public function throwException($errno, $errstr) {
         throw new RuntimeException($errstr);
+    }
+
+    /**
+     * Verifies that a Phar archive has is OpenSSL-signed and the signature is valid
+     * @param string path to Phar archive
+     * @param string path to remote Phar path (used in exceptions)
+     * @throws SignatureVerificationException
+     */
+    protected function verifyPharSignature($local_path, $phar_path) {
+        try {
+            // When public key is invalid, openssl throws a
+            // 'supplied key param cannot be coerced into a public key' warning
+            // and phar ignores sig verification.
+            // We need to protect from that by catching the warning
+            set_error_handler(array($this, 'throwException'));
+            $phar = new Phar($local_path); // here the verification happens
+            restore_error_handler();
+
+            $sig = $phar->getSignature();
+
+            unset($phar);
+            if ($sig['hash_type'] !== 'OpenSSL') {
+                throw new SignatureVerificationException("Downloaded '$phar_path' is not signed with OpenSSL!");
+            }
+        } catch (UnexpectedValueException $e) {
+            throw new SignatureVerificationException($e->getMessage());
+        } catch (RuntimeException $e) {
+            throw new SignatureVerificationException($e->getMessage());
+        }
+
+        return true;
     }
 
     /**
@@ -118,13 +136,22 @@ class RemotePharDownloader {
     public function delete($phar_path) {
         $this->assertValidPharURI($phar_path);
 
-        $local_path = $this->getLocalPath($path);
+        $local_path = $this->getLocalPath($phar_path);
 
-        if (file_exists($local_path . '.pubkey')) {
-            unlink($local_path . '.pubkey');
+        unlink($local_path);
+
+        if (file_exists($file = $this->getPubkeyFilename($local_path))) {
+            unlink($file);
         }
+    }
 
-        return unlink($local_path);
+    /**
+     * Return Phar compatible filename for public key for a given Phar archive
+     * @param string $path
+     * @return string
+     */
+    protected function getPubkeyFilename($path) {
+        return $this->stripCompressionSuffix($path) . '.pubkey';
     }
 
     /**
@@ -133,7 +160,22 @@ class RemotePharDownloader {
      * @return string
      */
     protected function getLocalPath($remote_path) {
-        return $this->tmp_dir . '/' . md5($remote_path) . '.phar';
+        $suffix = '';
+        $match = array();
+        if (preg_match(self::PHAR_FILENAME_REGEX, $remote_path, $match)) {
+            $suffix = $match[1];
+        }
+        return $this->tmp_dir . '/' . md5($remote_path) . '.phar' . $suffix;
+    }
+
+    /**
+     * @internal
+     * @param string $path
+     * @return string
+     */
+    protected function stripCompressionSuffix($path) {
+        $suffix = '.phar';
+        return preg_replace(self::PHAR_FILENAME_REGEX, $suffix, $path);
     }
 
     /**
@@ -144,7 +186,7 @@ class RemotePharDownloader {
      * @throws RuntimeException
      */
     protected function assertValidPharURI($path) {
-        if (!preg_match('#\.phar$#', $path)) {
+        if (!preg_match(self::PHAR_FILENAME_REGEX, $path)) {
             throw new RuntimeException("$path does not end with '.phar'!");
         }
     }

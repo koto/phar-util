@@ -17,7 +17,8 @@ $priv_file = './cert/priv.pem'; // path to PEM private file
 $pub_file = './cert/pub.pem'; // path to PEM public file
 
 try {
-    unlink($dest);
+    foreach (glob($dest . '*') as $file)
+      unlink($file);
     $phar = new Phar($dest);
 
     // get the private key
@@ -27,8 +28,11 @@ try {
     }
 
     // apply the signature
-    $phar->setSignatureAlgorithm(Phar::OPENSSL, $private_key);
     $phar->buildFromDirectory($src);
+    // unfortunately Phar disables openssl signing for compressed archives
+    // $phar->compress(PHAR::GZ);
+
+    $phar->setSignatureAlgorithm(Phar::OPENSSL, $private_key);
 
     // attach the public key for verification
     if (!copy($pub_file, $dest . '.pubkey')) {
