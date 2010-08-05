@@ -1,6 +1,5 @@
 <?php
-
-require_once 'SignatureVerificationException.php';
+require_once 'PharUtils/SignatureVerificationException.php';
 
 /**
  * Downloads remote signed Phar archives to local directory and assigns
@@ -39,7 +38,7 @@ require_once 'SignatureVerificationException.php';
  * @author Krzysztof Kotowicz <kkotowicz at gmail dot com>
  * @package remote-phar
  */
-class RemotePharVerifier {
+class PharUtils_RemotePharVerifier {
 
     const PHAR_FILENAME_REGEX = '#\.phar(\.[^.]+$|$)#';
 
@@ -97,7 +96,7 @@ class RemotePharVerifier {
      * @param string $phar_path Phar archive URI (file path, url, ...)
      * @param bool $overwrite should we overwrite already present local file?
      * @throws RuntimeException
-     * @throws SignatureVerificationException
+     * @throws PharUtils_SignatureVerificationException
      */
     public function fetch($phar_path, $overwrite = false) {
         $this->assertValidPharURI($phar_path);
@@ -195,12 +194,12 @@ class RemotePharVerifier {
 
             unset($phar);
             if ($sig['hash_type'] !== 'OpenSSL') {
-                throw new SignatureVerificationException("'$phar_path' is not signed with OpenSSL!");
+                throw new PharUtils_SignatureVerificationException("'$phar_path' is not signed with OpenSSL!");
             }
         } catch (UnexpectedValueException $e) {
-            throw new SignatureVerificationException($e->getMessage());
+            throw new PharUtils_SignatureVerificationException($e->getMessage());
         } catch (RuntimeException $e) {
-            throw new SignatureVerificationException($e->getMessage());
+            throw new PharUtils_SignatureVerificationException($e->getMessage());
         }
 
         return true;

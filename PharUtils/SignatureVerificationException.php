@@ -5,4 +5,4 @@
  * @author Krzysztof Kotowicz <kkotowicz at gmail dot com>
  * @package remote-phar
  */
-class SignatureVerificationException extends RuntimeException {}
+class PharUtils_SignatureVerificationException extends RuntimeException {}
