@@ -1,7 +1,7 @@
 PharUtil - Security-oriented utilities for Phar archives
 ========================================================
 
-Author: Krzysztof Kotowicz <kkotowicz at gmail dot com>
+Author: Krzysztof Kotowicz - kkotowicz at gmail dot com
 License: MIT
 
 Utilities for building, signing and verifyng Phar archives with OpenSSL public/private key.
@@ -10,7 +10,7 @@ from remote locations without the risk of Arbitraty Remote Code Execution.
 
 Introduction
 ------------
-Phar archives, though they have many superb features for a PHP developer, have a certain limitation
+[Phar](http://php.net/manual/en/book.phar.php) archives, though they have many superb features for a PHP developer, have a certain limitation
 when it comes to their security - although standard Phar file can be signed, the key used to verify
 the signature (i.e. the public key) must be stored alongside the archive. Moreover, the signature
 verification process is hardcoded and does not allow you to supply the public key by yourself.
