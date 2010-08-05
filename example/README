@@ -1,5 +1,5 @@
-Example on how to use certificate generation, phar building 
-and PharUtil_RemotePearVerifier class.
+Example on how to use certificate generation, phar building
+and PharUtil_RemotePharVerifier class.
 
 Make sure you have installed the PharUtil PEAR package!
 $ sudo pear install PharUtil-x.y.z.tgz
@@ -12,7 +12,7 @@ $ sudo pear install PharUtil-x.y.z.tgz
 3. Go back to example root directory
    $ cd ..
 4. Build your Phar archive in build/test.phar:
-   $ phar-build-phar --phar ./build/test.phar 
+   $ phar-build --phar ./build/test.phar
 5. Test both local and remote inclusions:
    $ php local.php
    $ php remote.php

@@ -13,7 +13,7 @@ require_once 'PharUtil/SignatureVerificationException.php';
  *
  * Example:
  * <code>
- * $verifier = new RemotePharVerifier('/tmp', './lib', './cert/public.pem');
+ * $verifier = new PharUtil_RemotePharVerifier('/tmp', './lib', './cert/public.pem');
  * try {
  *   $verified_file = $verifier->fetch("http://example.com/library.phar");
  *   // $verified_file contains absolute filepath of a downloaded file

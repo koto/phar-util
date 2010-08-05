@@ -66,17 +66,53 @@ $ echo "phar.readonly=0" | sudo tee -a /etc/php5/conf.d/phar.ini
 
 (the last line is needed on the server only and for security reasons should NOT be executed on client)
 
-After preparing th PHP engine, refer to cert/README to generate certificates.
+Install the library through PEAR installer:
+$ pear install PharUtil-x-y-z.tgz
 
-Usage
+Building the archive:
 -----
-1. Place your files in src/ directory
-2. Use
-   $ php build.php
-   to build a signed phar archive
-3. Copy public key to a client
-4. See code in remote.php to learn how to verify and include the phar archive in your application.
+Building a Phar archive:
 
+1. Generate certificates in cert/ directory (will be put in priv.pem and pub.pem)
+   $ mkdir cert/
+   $ cd cert/
+   $ phar-generate-cert
+2. Create src/ directory and copy all the files to build the archive from there
+3. Use
+   $ phar-build --phar library.phar
+   to build a signed phar archive
+4. Copy public key to a client
+
+Using the archive locally
+--------------------------
+Just use it like a normal Phar archive
+
+include_once 'phar://path/to/library.phar';
+
+Using the archive on the client
+-------------------------------
+Use PharUtil_RemotePharVerifier class to securely check for the Phar signature
+before using the archive.
+
+<?php
+
+// all verified Phars will be copied to lib/ directory
+$verifier = new PharUtil_RemotePharVerifier('/tmp', './lib', './cert/public.pem');
+try {
+  $verified_file = $verifier->fetch("http://example.com/library.phar");
+} catch (Exception $e) {
+ // verification failed
+ exit();
+}
+
+// $verified_file contains absolute filepath of a downloaded file
+// with signature verified from './cert/public.pem'
+include_once $verified_file;
+// or
+include_once 'phar://' . $verified_file . '/some/file/within.php';
+// or
+echo file_get_contents('phar://' . $verified_file . '/readme.txt');
+?>
 
 Contact
 -------
