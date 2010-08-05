@@ -47,8 +47,9 @@ Usage scenario is as follows:
 On server (publisher):
 
 1. Create public / private keys with Open SSL (see `cert/README`)
-2. On a server build a code (see `example/build.php`) and sign it using your private key
-   You may use the code on a server like any other phar archive (see `example/local.php`)
+2. On a server build a code (see `example/build.php`) and sign it using your private key.
+
+You may use the built archive on a server like any other Phar archive (see `example/local.php`)
 
 On client (consumer):
 
@@ -70,9 +71,9 @@ it is only signed so it cannot be changed by third party.
 Installing
 ----------
 
-To be able to use the project, you must have the `Phar v2.0.0` PHP extension. and have a working
-OpenSSL in PHP.If you're using PHP >= 5.3.0, Phar is already built for you, for older versions
-you must build it from [pecl](http://pecl.php.net)
+To be able to use the project, you must have the Phar v2.0.0 PHP extension. and have a working
+OpenSSL in PHP. If you're using PHP >= 5.3.0, Phar is already built for you, for older versions
+you must build it from [pecl](http://pecl.php.net).
 
 E.g. under Ubuntu, these steps are required to build and configure the Phar extension:
 
@@ -84,18 +85,22 @@ E.g. under Ubuntu, these steps are required to build and configure the Phar exte
 (the last line is needed on the server only and for security reasons should NOT be executed on client)
 
 Install the library through PEAR installer:
-$ pear install PharUtil-x-y-z.tgz
+    $ pear install PharUtil-x-y-z.tgz
 
 Building a Phar archive
 ------------------------
 
 1. Generate certificates in `cert/` directory (will be put in `priv.pem` and `pub.pem`)
+
     $ mkdir cert/
     $ cd cert/
     $ phar-generate-cert
+
 2. Create `src/` directory and copy all the files to build the archive from there
 3. Build a signed phar archive
+
     $ phar-build --phar library.phar
+
 4. Copy public key to a client
 
 Using the archive locally
