@@ -6,7 +6,10 @@
  * @author Krzysztof Kotowicz <kkotowicz at gmail dot com>
  * @package PharUtil
  */
- 
+
+// manually add .. to include_path in case you don't have the PEAR package installed (yet)
+set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__FILE__) . '/../');
+
 require_once 'PharUtil/RemotePharVerifier.php';
 
 $d = new PharUtil_RemotePharVerifier('./tmp', './verified', './cert/pub.pem');

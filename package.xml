@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.7.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0     http://pear.php.net/dtd/tasks-1.0.xsd     http://pear.php.net/dtd/package-2.0     http://pear.php.net/dtd/package-2.0.xsd">
+ <name>PharUtil</name>
+ <uri>dontknow</uri>
+ <summary>Security-oriented utilities for Phar archives</summary>
+ <description>Utilities for signing and verifyng Phar archives with OpenSSL public/private key</description>
+ <lead>
+  <name>Krzysztof Kotowicz</name>
+  <user>koto</user>
+  <email>kkotowicz@gmail.com</email>
+  <active>yes</active>
+ </lead>
+ <date>2010-08-05</date>
+ <time>15:20:37</time>
+ <version>
+  <release>0.1.0</release>
+  <api>0.1</api>
+ </version>
+ <stability>
+  <release>beta</release>
+  <api>beta</api>
+ </stability>
+ <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
+ <notes>First release</notes>
+ <contents>
+  <dir name="/">
+   <file name="LICENSE" role="data" />
+   <file name="README" role="data" />
+   <dir name="PharUtil">
+    <file name="RemotePharVerifier.php" role="php">
+        <tasks:replace from="@package_version@" to="version" type="package-info" />
+    </file>
+    <file name="SignatureVerificationException.php" role="php">
+        <tasks:replace from="@package_version@" to="version" type="package-info" />
+    </file>
+   </dir>
+   <dir name="test" >
+        <dir name="PharUtil">
+            <file name="RemotePharVerifierTest.php" role="test" />
+            <dir name="data">
+                <dir name="cert">
+                    <file name="priv.pem" role="test" />
+                    <file name="pub.pem" role="test" />
+                    <file name="trash.pem" role="test" />
+                </dir>
+                <dir name="phar">
+                    <file name="modified.phar" role="test" />
+                    <file name="nosig.phar" role="test" />
+                    <file name="test.phar" role="test" />
+                    <file name="test.phar.gz" role="test" />
+                    <file name="wrongsig.phar" role="test" />
+                </dir>
+            </dir>
+        </dir>
+   </dir>
+   <dir name="example">
+	   <dir name="build">
+	    <file name="keep_me" role="doc" />
+	   </dir>
+	   <dir name="cert">
+        <file name="README" role="doc" />
+	   </dir>
+       <dir name="src">
+        <file name="index.php" role="doc" />
+        <file name="test.php" role="doc" />
+       </dir>
+       <dir name="tmp">
+        <file name="keep_me" role="doc" />
+       </dir>
+       <dir name="verified">
+        <file name="keep_me" role="doc" />
+       </dir>
+       <file name="local.php" role="doc" />
+       <file name="remote.php" role="doc" />
+       <file name="README" role="doc" />
+   </dir>
+   <file name="phar-build.php" role="script">
+    <tasks:replace from="/usr/bin/env php" to="php_bin" type="pear-config"/>
+    <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+    <tasks:replace from="@package_version@" to="version" type="package-info" />
+   </file>
+   <file name="phar-build.bat" role="script">
+	<tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+	<tasks:replace from="@bin_dir@" to="bin_dir" type="pear-config" />
+   </file>
+   <file name="phar-generate-cert" role="script" />
+  </dir>
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.2.0</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0</min>
+   </pearinstaller>
+   <package>
+    <name>Console_CommandLine</name>
+    <channel>pear.php.net</channel>
+    <min>1.1.3</min>
+   </package>
+   <extension>
+    <name>Phar</name>
+   </extension>
+  </required>
+ </dependencies>
+ <phprelease>
+  <installconditions>
+   <os>
+    <name>windows</name>
+   </os>
+  </installconditions>
+  <filelist>
+   <install as="phar-build" name="phar-build.php" />
+   <install as="phar-build.bat" name="phar-build.bat" />
+  </filelist>
+ </phprelease>
+ <phprelease>
+  <filelist>
+   <install as="phar-build" name="phar-build.php" />
+   <ignore name="phar-build.bat" />
+  </filelist>
+ </phprelease>
+ <changelog>
+  <release>
+   <version>
+    <release>0.1</release>
+    <api>0.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2010-08-05</date>
+   <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
+   <notes>First release</notes>
+  </release>
+ </changelog>
+</package>
