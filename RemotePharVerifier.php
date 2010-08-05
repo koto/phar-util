@@ -41,9 +41,11 @@ require_once 'SignatureVerificationException.php';
  */
 class RemotePharVerifier {
 
-    const PHAR_FILENAME_REGEX = '#\.phar(\.[^.]+|$)#';
+    const PHAR_FILENAME_REGEX = '#\.phar(\.[^.]+$|$)#';
 
     const UNSAFE_FILENAME_CHARS = '#[^-a-zA-Z0-9._]#';
+
+    const ERR_INVALID_PHAR_FILENAME = 1;
 
     /**
      * @var string $fetch_dir Temporary directory for downloaded code
@@ -63,11 +65,11 @@ class RemotePharVerifier {
     /**
      * Constructor for the class.
      * @param string $fetch_dir temporary directory for the files
-     * @param string $verified_dir directory for verified archives (if null, they will stay in $fetch_dir)
+     * @param string $verified_dir directory for verified archives
      * @param string $pub_key_file path of a PEM file with public key
      * @throws RuntimeException
      */
-    public function __construct($fetch_dir, $verified_dir = null, $pub_key_file = null) {
+    public function __construct($fetch_dir, $verified_dir, $pub_key_file = null) {
         if (!class_exists('Phar')) {
             throw new RuntimeException("Phar is not enabled in this PHP configuration!");
         }
@@ -83,6 +85,10 @@ class RemotePharVerifier {
         }
 
         $this->pub_key_file = $pub_key_file;
+
+        if (!is_null($this->pub_key_file) && !in_array('OpenSSL', Phar::getSupportedSignatures())) {
+            throw new RuntimeException("No support for OpenSSL signatures in this PHP configuration!");
+        }
     }
 
     /**
@@ -96,11 +102,12 @@ class RemotePharVerifier {
     public function fetch($phar_path, $overwrite = false) {
         $this->assertValidPharURI($phar_path);
         $local_path = $this->getLocalPath($phar_path);
-        if (file_exists($local_path)) {
+        $dest_file = $this->verified_dir . DIRECTORY_SEPARATOR . $this->stripRandomness($local_path);
+        if (file_exists($dest_file)) {
             if ($overwrite) {
-                $this->delete($phar_path);
+                $this->doDelete($local_path);
             } else {
-                return realpath($local_path);
+                return realpath($dest_file);
             }
         }
 
@@ -114,12 +121,16 @@ class RemotePharVerifier {
             if (!copy($this->pub_key_file, $this->getPubkeyFilename($local_path))) {
                 throw new RuntimeException("Error copying public key file!");
             }
-            $this->verifyPharSignature($local_path, $phar_path);
+            try {
+                $this->verifyPharSignature($local_path, $phar_path);
+            } catch (Exception $e) {
+                $this->doDelete($local_path); // delete offending files
+                throw $e;
+            }
         }
 
-        if (!is_null($this->verified_dir)) { // copy the file to verified dir
-            $local_path = $this->copyToVerified($local_path);
-        }
+        // copy the file to verified dir
+        $local_path = $this->copyToVerified($local_path);
 
         return realpath($local_path);
     }
@@ -142,12 +153,26 @@ class RemotePharVerifier {
     protected function copyToVerified($local_path) {
         $local_path = basename($local_path);
         $pubkey_path = $this->getPubkeyFilename($local_path);
-        copy($this->fetch_dir . DIRECTORY_SEPARATOR . $local_path, $this->verified_dir . DIRECTORY_SEPARATOR . $local_path);
+        copy($this->fetch_dir . DIRECTORY_SEPARATOR . $local_path, $this->verified_dir . DIRECTORY_SEPARATOR . $this->stripRandomness($local_path));
         if (file_exists($this->fetch_dir . DIRECTORY_SEPARATOR . $pubkey_path)) {
-            copy($this->fetch_dir . DIRECTORY_SEPARATOR . $pubkey_path, $this->verified_dir . DIRECTORY_SEPARATOR . $pubkey_path);
+            copy($this->fetch_dir . DIRECTORY_SEPARATOR . $pubkey_path, $this->verified_dir . DIRECTORY_SEPARATOR . $this->stripRandomness($pubkey_path));
         }
 
-        return realpath($this->verified_dir . DIRECTORY_SEPARATOR . $local_path);
+        return $this->verified_dir . DIRECTORY_SEPARATOR . $this->stripRandomness($local_path);
+    }
+
+    /**
+     * @internal
+     */
+    protected function stripRandomness($filename) {
+        return preg_replace('#^\d+-#', '', $filename);
+    }
+
+    /**
+     * @internal
+     */
+    protected function addRandomness($filename) {
+        return rand(0, 100000) . '-' . $filename;
     }
 
     /**
@@ -182,16 +207,11 @@ class RemotePharVerifier {
     }
 
     /**
-     * Deletes locally stored version of phar archive
-     * @param string $phar_path
-     * @throws RuntimeException
-     * @return bool
+     * Performs the deletion
+     *
+     * @param string $local_path
      */
-    public function delete($phar_path) {
-        $this->assertValidPharURI($phar_path);
-
-        $local_path = $this->getLocalPath($phar_path);
-
+    protected function doDelete($local_path) {
         unlink($local_path);
 
         if (file_exists($file = $this->getPubkeyFilename($local_path))) {
@@ -224,7 +244,10 @@ class RemotePharVerifier {
         $remote_file = preg_replace(self::PHAR_FILENAME_REGEX, '', basename($remote_path));
         $filename = preg_replace(self::UNSAFE_FILENAME_CHARS, '-', $remote_file);
 
-        return $this->fetch_dir . '/' . $filename . '.phar' . $suffix;
+        // PHAR or OpenSSL has a bug - if a filename will pass validation for the first time,
+        // all subsequent verifies will also pass (even if file contents change)
+        // we need to add randomness to file name
+        return $this->fetch_dir . '/' . $this->addRandomness($filename  . '.phar' . $suffix);
     }
 
     /**
@@ -246,7 +269,7 @@ class RemotePharVerifier {
      */
     protected function assertValidPharURI($path) {
         if (!preg_match(self::PHAR_FILENAME_REGEX, $path)) {
-            throw new RuntimeException("$path does not end with '.phar'!");
+            throw new RuntimeException("$path does not end with '.phar'!", self::ERR_INVALID_PHAR_FILENAME);
         }
     }
 
