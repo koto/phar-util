@@ -90,18 +90,18 @@ Install the library through PEAR installer:
 Building a Phar archive
 ------------------------
 
-1. Generate certificates in `cert/` directory (will be put in `priv.pem` and `pub.pem`)
+* Generate certificates in `cert/` directory (will be put in `priv.pem` and `pub.pem`)
 
     $ mkdir cert/
     $ cd cert/
     $ phar-generate-cert
 
-2. Create `src/` directory and copy all the files to build the archive from there
-3. Build a signed phar archive
+* Create `src/` directory and copy all the files to build the archive from there
+* Build a signed phar archive
 
     $ phar-build --phar library.phar
 
-4. Copy public key to a client
+* Copy public key to a client
 
 Using the archive locally
 --------------------------
