@@ -3,6 +3,6 @@
 /**
  * This file is part of the Remote-Phar library.
  * @author Krzysztof Kotowicz <kkotowicz at gmail dot com>
- * @package remote-phar
+ * @package PharUtil
  */
-class PharUtils_SignatureVerificationException extends RuntimeException {}
+class PharUtil_SignatureVerificationException extends RuntimeException {}

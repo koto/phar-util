@@ -4,12 +4,12 @@
  *
  * This file is part of the Remote-Phar library.
  * @author Krzysztof Kotowicz <kkotowicz at gmail dot com>
- * @package remote-phar
+ * @package PharUtil
  */
+ 
+require_once 'PharUtil/RemotePharVerifier.php';
 
-require_once 'RemotePharVerifier.php';
-
-$d = new RemotePharVerifier('./tmp', './lib', './cert/pub.pem');
+$d = new PharUtil_RemotePharVerifier('./tmp', './verified', './cert/pub.pem');
 
 // here the local URI is used, but it could be any remote, e.g.  http:// location
 $path = dirname(__FILE__) . '/build/test.phar';
