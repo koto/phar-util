@@ -17,6 +17,7 @@ require_once 'Console/CommandLine.php';
 $parser = new Console_CommandLine(array(
     'description' => 'Build a phar archive and sign it using a private key from a given file',
     'version'     => '@package_version@',
+    'name'        => 'phar-build',
 ));
 
 // add an option to make the program verbose

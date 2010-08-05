@@ -12,6 +12,9 @@ Author: [Krzysztof Kotowicz](http://blog.kotowicz.net) - kkotowicz at gmail dot 
 
 License: MIT
 
+Source code: [github](http://github.com/koto/phar-util)
+
+PEAR channel server: [pear.kotowicz.net](http://pear.kotowicz.net)
 Introduction
 ------------
 [Phar](http://php.net/manual/en/book.phar.php) archives, though they have many superb features for a PHP
@@ -85,7 +88,8 @@ E.g. under Ubuntu, these steps are required to build and configure the Phar exte
 (the last line is needed on the server only and for security reasons should NOT be executed on client)
 
 Install the library through PEAR installer:
-    $ pear install PharUtil-x-y-z.tgz
+    $ sudo pear channel-discover pear.kotowicz.net
+    $ sudo pear install kotowicz/PharUtil-beta
 
 Building a Phar archive
 ------------------------
