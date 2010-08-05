@@ -1,10 +1,12 @@
-Remote-Phar
-===========
+PharUtil - Security-oriented utilities for Phar archives
+========================================================
 
 Author: Krzysztof Kotowicz <kkotowicz at gmail dot com>
 License: MIT
 
-Remote-Phar library facilitates secure distribution of Phar archives to remote locations.
+Utilities for building, signing and verifyng Phar archives with OpenSSL public/private key.
+Both local and remote deployment of Phar archives is possible, enabling secure execution of code fetched
+from remote locations without the risk of Arbitraty Remote Code Execution.
 
 Introduction
 ------------
@@ -18,7 +20,7 @@ clients, because both the key and code are stored on the server - attacker could
 DNS spoofing to emulate the server and supply the code without any signature or using his own
 pair of keys. Because of that, Standard Phar extension does not allow including remote (e.g. HTTP://) Phar archives to avoid the old security vulnerability of remote code execution (see e.g. allow_url_fopen and allow_url_include discussion).
 
-To mitigate this, the remote-phar library uses a different method:
+To mitigate this, the PharUtil library uses a different method:
  - the key used to verify the signature is stored on a client (shared-secret) and is
    never transferred over-the-wire
  - all code is downloaded to the local client cache and is verifed using the stored code
@@ -69,9 +71,8 @@ $ echo "phar.readonly=0" | sudo tee -a /etc/php5/conf.d/phar.ini
 Install the library through PEAR installer:
 $ pear install PharUtil-x-y-z.tgz
 
-Building the archive:
------
-Building a Phar archive:
+Building a Phar archive
+------------------------
 
 1. Generate certificates in cert/ directory (will be put in priv.pem and pub.pem)
    $ mkdir cert/

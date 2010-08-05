@@ -3,7 +3,10 @@
  <name>PharUtil</name>
  <uri>dontknow</uri>
  <summary>Security-oriented utilities for Phar archives</summary>
- <description>Utilities for signing and verifyng Phar archives with OpenSSL public/private key</description>
+ <description>Utilities for building, signing and verifyng Phar archives with OpenSSL public/private key.
+ Both local and remote deployment of Phar archives is possible, enabling secure execution of code fetched
+ from remote locations without the risk of Arbitraty Remote Code Execution.
+ </description>
  <lead>
   <name>Krzysztof Kotowicz</name>
   <user>koto</user>
@@ -25,7 +28,7 @@
  <contents>
   <dir name="/">
    <file name="LICENSE" role="data" />
-   <file name="README" role="data" />
+   <file name="README.md" role="data" />
    <dir name="PharUtil">
     <file name="RemotePharVerifier.php" role="php">
         <tasks:replace from="@package_version@" to="version" type="package-info" />
