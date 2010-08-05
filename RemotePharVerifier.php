@@ -14,71 +14,99 @@ require_once 'SignatureVerificationException.php';
  *
  * Example:
  * <code>
- * $downloader = new RemotePharDownloader('/tmp', 'cert/public.pem');
+ * $verifier = new RemotePharVerifier('/tmp', './lib', './cert/public.pem');
  * try {
- *   $local = $downloader->download("http://example.com/library.phar");
+ *   $verified_file = $verifier->fetch("http://example.com/library.phar");
+ *   // $verified_file contains absolute filepath of a downloaded file
+ *   // with signature verified from './cert/public.pem'
+ *
+ *   include_once $verified_file;
+ *   // or
+ *   include_once 'phar://' . $verified_file . '/some/file/within.php';
+ *   // or
+ *   echo file_get_contents('phar://' . $verified_file . '/readme.txt');
+ *
  * } catch (Exception $e) {
- *   // ...
+ *   // verification failed
  * }
- *
- * include_once $local; // this will verify the code signature
- *
  * </code>
+ * Limitations:
+ *  - Compressed Phar archives (Phar::isCompresses()) at this moment
+ *    cannot be verified with OpenSSL (Phar limitation).
+ *    Use compression while serving the files instead.
  *
  * This file is part of the Remote-Phar library.
  * @author Krzysztof Kotowicz <kkotowicz at gmail dot com>
  * @package remote-phar
  */
-class RemotePharDownloader {
+class RemotePharVerifier {
 
-    const PHAR_FILENAME_REGEX = '#\.phar(\..*|$)#';
+    const PHAR_FILENAME_REGEX = '#\.phar(\.[^.]+|$)#';
+
+    const UNSAFE_FILENAME_CHARS = '#[^-a-zA-Z0-9._]#';
+
     /**
-     * @var string $tmp_dir Temporary directory for downloaded code
+     * @var string $fetch_dir Temporary directory for downloaded code
      */
-    private $tmp_dir;
+    protected $fetch_dir;
+
+    /**
+     * @var string|null $verified_dir (optional) Verified Phar archives are moved to this directory
+     */
+    protected $verified_dir;
 
     /**
      * @var string|null (Optional) path to a public key file to be assigned to downloaded phar archives
      */
-    private $pub_key_file = null;
+    protected $pub_key_file = null;
 
     /**
      * Constructor for the class.
-     * @param string $tmp_dir temporary directory for the files
+     * @param string $fetch_dir temporary directory for the files
+     * @param string $verified_dir directory for verified archives (if null, they will stay in $fetch_dir)
      * @param string $pub_key_file path of a PEM file with public key
      * @throws RuntimeException
      */
-    public function __construct($tmp_dir = './tmp', $pub_key_file = null) {
-        $this->tmp_dir = $tmp_dir;
-        if (!is_dir($this->tmp_dir)) {
-            throw new RuntimeException("Temporary directory $tmp_dir does not exist!");
+    public function __construct($fetch_dir, $verified_dir = null, $pub_key_file = null) {
+        if (!class_exists('Phar')) {
+            throw new RuntimeException("Phar is not enabled in this PHP configuration!");
         }
+
+        $this->fetch_dir = $fetch_dir;
+        if (!is_dir($this->fetch_dir)) {
+            throw new RuntimeException("Temporary directory $fetch_dir does not exist!");
+        }
+
+        $this->verified_dir = $verified_dir;
+        if (!is_dir($this->verified_dir)) {
+            throw new RuntimeException("Verified directory $verified_dir does not exist!");
+        }
+
         $this->pub_key_file = $pub_key_file;
     }
 
     /**
-     * Main method - downloads a Phar archive to a local location and verifies its signature
+     * Main method - downloads a Phar archive to a local directory and verifies its signature
      *
      * @param string $phar_path Phar archive URI (file path, url, ...)
      * @param bool $overwrite should we overwrite already present local file?
      * @throws RuntimeException
      * @throws SignatureVerificationException
      */
-    public function download($phar_path, $overwrite = false) {
+    public function fetch($phar_path, $overwrite = false) {
         $this->assertValidPharURI($phar_path);
         $local_path = $this->getLocalPath($phar_path);
-
         if (file_exists($local_path)) {
             if ($overwrite) {
                 $this->delete($phar_path);
             } else {
-                return $local_path;
+                return realpath($local_path);
             }
         }
 
         // copy phar
         if (!copy($phar_path, $local_path)) {
-            throw new RuntimeException("Error downloading file '$phar_path'!");
+            throw new RuntimeException("Error fetching file '$phar_path'!");
         }
 
         // copy pubkey
@@ -89,11 +117,37 @@ class RemotePharDownloader {
             $this->verifyPharSignature($local_path, $phar_path);
         }
 
-        return $local_path;
+        if (!is_null($this->verified_dir)) { // copy the file to verified dir
+            $local_path = $this->copyToVerified($local_path);
+        }
+
+        return realpath($local_path);
     }
 
+    /**
+     * @internal
+     * @param $errno
+     * @param $errstr
+     */
     public function throwException($errno, $errstr) {
         throw new RuntimeException($errstr);
+    }
+
+    /**
+     * Copies phar archive files to a verified directory.
+     * To be called AFTER verification!
+     * @param string $local_path
+     * @param string path to Phar in verified directory
+     */
+    protected function copyToVerified($local_path) {
+        $local_path = basename($local_path);
+        $pubkey_path = $this->getPubkeyFilename($local_path);
+        copy($this->fetch_dir . DIRECTORY_SEPARATOR . $local_path, $this->verified_dir . DIRECTORY_SEPARATOR . $local_path);
+        if (file_exists($this->fetch_dir . DIRECTORY_SEPARATOR . $pubkey_path)) {
+            copy($this->fetch_dir . DIRECTORY_SEPARATOR . $pubkey_path, $this->verified_dir . DIRECTORY_SEPARATOR . $pubkey_path);
+        }
+
+        return realpath($this->verified_dir . DIRECTORY_SEPARATOR . $local_path);
     }
 
     /**
@@ -116,7 +170,7 @@ class RemotePharDownloader {
 
             unset($phar);
             if ($sig['hash_type'] !== 'OpenSSL') {
-                throw new SignatureVerificationException("Downloaded '$phar_path' is not signed with OpenSSL!");
+                throw new SignatureVerificationException("'$phar_path' is not signed with OpenSSL!");
             }
         } catch (UnexpectedValueException $e) {
             throw new SignatureVerificationException($e->getMessage());
@@ -165,7 +219,12 @@ class RemotePharDownloader {
         if (preg_match(self::PHAR_FILENAME_REGEX, $remote_path, $match)) {
             $suffix = $match[1];
         }
-        return $this->tmp_dir . '/' . md5($remote_path) . '.phar' . $suffix;
+
+        // construct safe filename (no extension)
+        $remote_file = preg_replace(self::PHAR_FILENAME_REGEX, '', basename($remote_path));
+        $filename = preg_replace(self::UNSAFE_FILENAME_CHARS, '-', $remote_file);
+
+        return $this->fetch_dir . '/' . $filename . '.phar' . $suffix;
     }
 
     /**
@@ -196,8 +255,8 @@ class RemotePharDownloader {
      * @param string $phar_path
      * @throws RuntimeException
      */
-    public function downloadAndInclude($phar_path) {
-        $path = $this->download($phar_path);
+    public function fetchAndInclude($phar_path) {
+        $path = $this->fetch($phar_path);
         include $path;
     }
 
@@ -206,8 +265,8 @@ class RemotePharDownloader {
      * @param string $phar_path
      * @throws RuntimeException
      */
-    public function downloadAndRequire($phar_path) {
-        $path = $this->download($phar_path);
+    public function fetchAndRequire($phar_path) {
+        $path = $this->fetch($phar_path);
         require $path;
     }
 
@@ -216,8 +275,8 @@ class RemotePharDownloader {
      * @param string $phar_path
      * @throws RuntimeException
      */
-    public function downloadAndRequireOnce($phar_path) {
-        $path = $this->download($phar_path);
+    public function fetchAndRequireOnce($phar_path) {
+        $path = $this->fetch($phar_path);
         require_once $path;
     }
 }

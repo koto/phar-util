@@ -9,4 +9,4 @@
 
 require_once './build/test.phar';
 
-echo test() . "\n";
+echo test() . PHP_EOL;

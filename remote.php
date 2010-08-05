@@ -7,14 +7,17 @@
  * @package remote-phar
  */
 
-require_once 'RemotePharDownloader.php';
+require_once 'RemotePharVerifier.php';
 
-$d = new RemotePharDownloader('./tmp', './cert/pub.pem');
+$d = new RemotePharVerifier('./tmp', './lib', './cert/pub.pem');
 
 // here the local URI is used, but it could be any remote, e.g.  http:// location
 $path = dirname(__FILE__) . '/build/test.phar';
 
-$local_phar = $d->download($path, true);
+$local_phar = $d->fetch($path, true);
+
+echo $path, ' => ', $local_phar, PHP_EOL;
+
 require_once $local_phar;
 
-echo test();
+echo test() . PHP_EOL;
