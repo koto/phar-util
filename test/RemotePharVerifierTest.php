@@ -41,6 +41,13 @@ class RemotePharVerifierTest extends PHPUnit_Framework_TestCase {
         $v->fetch($this->remote_dir . 'wrongsig.phar');
     }
 
+    public function testInvalidPublicKeyWillStopVerification() {
+        $v = new RemotePharVerifier($this->fetch_dir, $this->verified_dir, $this->data_dir . '/cert/trash.pem');
+
+        $this->setExpectedException('SignatureVerificationException');
+        $v->fetch($this->remote_dir . 'wrongsig.phar');
+    }
+
     public function testModifiedPharsAreInvalid() {
         $v = new RemotePharVerifier($this->fetch_dir, $this->verified_dir, $this->getPubKey());
 
