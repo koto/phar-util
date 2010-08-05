@@ -92,12 +92,14 @@ Building a Phar archive
 
 * Generate certificates in `cert/` directory (will be put in `priv.pem` and `pub.pem`)
 
+
     $ mkdir cert/
     $ cd cert/
     $ phar-generate-cert
 
 * Create `src/` directory and copy all the files to build the archive from there
 * Build a signed phar archive
+
 
     $ phar-build --phar library.phar
 
