@@ -15,6 +15,7 @@ License: MIT
 Source code: [github](http://github.com/koto/phar-util)
 
 PEAR channel server: [pear.kotowicz.net](http://pear.kotowicz.net)
+
 Introduction
 ------------
 [Phar](http://php.net/manual/en/book.phar.php) archives, though they have many superb features for a PHP
@@ -71,11 +72,13 @@ Mentioned files are installed in `example` subdirectory of PEAR package document
 This method also doesn't protect anyone from looking AT the code - the code is not encrypted,
 it is only signed so it cannot be changed by third party.
 
-Installing
+Installation
 ----------
+### Dependencies
+* OpenSSL compiled into PHP (`--with-openssl`)
+* Phar 2.0.0
 
-To be able to use the project, you must have the Phar v2.0.0 PHP extension. and have a working
-OpenSSL in PHP. If you're using PHP >= 5.3.0, Phar is already built for you, for older versions
+If you're using PHP >= 5.3.0, Phar is already bundled. For older versions
 you must build it from [pecl](http://pecl.php.net).
 
 E.g. under Ubuntu, these steps are required to build and configure the Phar extension:
@@ -83,17 +86,25 @@ E.g. under Ubuntu, these steps are required to build and configure the Phar exte
     $ sudo apt-get install php5-dev
     $ sudo pecl install pecl/phar
     $ echo "extension=phar.so" | sudo tee /etc/php5/conf.d/phar.ini
+
+### Configuring Phar
+To be able to build Phar archives, you need to change php.ini setting: `phar.readonly=0`.
+Under Ubuntu, this is done by executing:
+
     $ echo "phar.readonly=0" | sudo tee -a /etc/php5/conf.d/phar.ini
 
-(the last line is needed on the server only and for security reasons should NOT be executed on client)
+This step is optional (and discouraged) if you will only be reading Phar archives
+
+### Install the package
 
 Install the library through PEAR installer:
     $ sudo pear channel-discover pear.kotowicz.net
     $ sudo pear install kotowicz/PharUtil-beta
 
-Building a Phar archive
-------------------------
+Usage
+-----
 
+#### Building a Phar archive
 * Generate certificates in `cert/` directory (will be put in `priv.pem` and `pub.pem`)
         $ mkdir cert/
         $ cd cert/
@@ -103,14 +114,14 @@ Building a Phar archive
         $ phar-build --phar library.phar
 * Copy public key to a client
 
-Using the archive locally
---------------------------
+#### Using the archive locally
+
 Just use it like a normal Phar archive
 
     include_once 'phar://path/to/library.phar';
 
-Using the archive on the client
--------------------------------
+#### Using the archive on the client
+
 Use `PharUtil_RemotePharVerifier` class to securely check for the Phar signature
 before using the archive.
 
