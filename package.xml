@@ -170,6 +170,7 @@
    <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
    <notes>Added phar-verify toolset, small changes</notes>
   </release>
+  <release>
    <version>
     <release>0.2</release>
     <api>0.1</api>
