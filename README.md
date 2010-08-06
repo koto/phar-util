@@ -19,8 +19,6 @@ PEAR channel server: [pear.kotowicz.net](http://pear.kotowicz.net)
 
 Command line utilties
 ---------------------
-There are 3 command line utilities in this package:
-
 * **phar-build** for building and signing Phar archives (see `phar-build -h` for help)
 * **phar-extract** for extracting/listing contents of Phar archive (see `phar-extract -h` for help)
 * **phar-verify** for verifying signature of Phar archive (see `phar-verify -h` for help)
