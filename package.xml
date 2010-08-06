@@ -3,7 +3,7 @@
  <name>PharUtil</name>
  <channel>pear.kotowicz.net</channel>
  <summary>Security-oriented utilities for Phar archives</summary>
- <description>Utilities for building, signing and verifyng Phar archives with OpenSSL public/private key.
+ <description>Command line utilities for building, signing and verifyng Phar archives with OpenSSL public/private key.
  Both local and remote deployment of Phar archives is possible, enabling secure execution of code fetched
  from remote locations without the risk of Arbitraty Remote Code Execution.
  </description>
@@ -16,7 +16,7 @@
  <date>2010-08-06</date>
  <time>15:20:37</time>
  <version>
-  <release>0.3.0</release>
+  <release>0.4.0</release>
   <api>0.1</api>
  </version>
  <stability>
@@ -157,6 +157,19 @@
   </filelist>
  </phprelease>
  <changelog>
+  <release>
+   <version>
+    <release>0.4</release>
+    <api>0.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2010-08-06</date>
+   <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
+   <notes>phar-build supports excluding files/directories</notes>
+  </release>
   <release>
    <version>
     <release>0.3</release>

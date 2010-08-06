@@ -28,6 +28,22 @@ $parser->addOption('src', array(
     'description' => "Source files directory\n(./src)"
 ));
 
+$parser->addOption('exclude_files', array(
+    'short_name'  => '-x',
+    'long_name'   => '--exclude',
+    'action'      => 'StoreString',
+    'default'     => '~$',
+    'description' => "Space separated regular expressions of filenames that should be excluded\n(\"~$\" by default)"
+));
+
+$parser->addOption('exclude_dirs', array(
+    'short_name'  => '-X',
+    'long_name'   => '--exclude-dir',
+    'action'      => 'StoreString',
+    'default'     => '/\.svn /\.git',
+    'description' => "Space separated regular expressions of directories that should be excluded\n(\"/\.svn /\.git\" by default)"
+));
+
 $parser->addOption('private', array(
     'short_name'  => '-p',
     'long_name'   => '--private',
@@ -110,12 +126,33 @@ try {
         throw new Exception("Could not load private key from '$priv_file'!");
     }
 
-    // apply the signature
-    $phar->buildFromDirectory($options['src']);
+    $iterator = new RecursiveDirectoryIterator($options['src']);
+
+    $iterator = new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::SELF_FIRST);
+
+    if ($options['exclude_files'] || $options['exclude_dirs']) {
+        $iterator = new ExcludeFilesIterator($iterator, $options['exclude_files'], $options['exclude_dirs']);
+    }
+
+    // buildFromIterator unfortunately sucks and skips nested directories (?)
+    foreach ($iterator as $file) {
+        echo "adding " . $file . PHP_EOL;
+        if ($file->isFile()) {
+            $phar->addFile($file, str_replace($options['src'], '', $file));
+        }
+        if ($file->isDir()) {
+            // this also doesn't work :(
+            $phar->addEmptyDir(str_replace($options['src'], '', $file));
+        }
+    }
+
+    //$phar->buildFromIterator($iterator, $options['src']);
+
     // unfortunately Phar disables openssl signing for compressed archives
     // $phar->compress(PHAR::GZ);
 
     if (!$options['nosign']) {
+        // apply the signature
         echo "Signing the archive with '$priv_file'." . PHP_EOL;
         $phar->setSignatureAlgorithm(Phar::OPENSSL, $private_key);
 
@@ -129,6 +166,44 @@ try {
     echo PHP_EOL . "{$options['phar']} created, exiting." . PHP_EOL;
 
 } catch (Exception $e) {
-    unlink($dest);
+    @unlink($dest);
     echo "Error: " . $e->getMessage() . "\n";
+}
+
+class ExcludeFilesIterator extends FilterIterator {
+    protected $exclude_file;
+    protected $exclude_path;
+
+    public function __construct(Iterator $i, $exclude_file, $exclude_path) {
+        parent::__construct($i);
+        $exclude_file = array_map(array($this, 'makeRegExp'), preg_split("/ +/", $exclude_file, -1, PREG_SPLIT_NO_EMPTY));
+        $exclude_path = array_map(array($this, 'makeRegExp'), preg_split("/ +/", $exclude_path, -1, PREG_SPLIT_NO_EMPTY));
+        $this->exclude_file = $exclude_file;
+        $this->exclude_path = $exclude_path;
+    }
+
+    protected function makeRegExp($pattern) {
+        return '!' . $pattern . '!';
+    }
+
+    public function accept() {
+        $file = $this->current();
+        if ($file->isFile()) {
+            foreach ($this->exclude_file as $pattern) {
+                if (preg_match($pattern, $file->getFilename())) {
+                    echo "skipping $file\n";
+                    return false;
+                }
+            }
+        }
+
+        foreach ($this->exclude_path as $pattern) {
+            if (preg_match($pattern, $file->getPathname())) {
+                echo "skipping $file\n";
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

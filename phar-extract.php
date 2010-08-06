@@ -73,7 +73,7 @@ if ($options['public']) {
 
 if (!$options['list']) {
     if (!is_dir($args['destination']) || !is_writable($args['destination'])) {
-        $parser->displayError("Destination directory in '{$args['destination']}' does not exist or is not writable.\n,", 5);
+        $parser->displayError("Destination directory '{$args['destination']}' does not exist or is not writable.\n,", 5);
     }
 }
 
