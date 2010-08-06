@@ -70,8 +70,11 @@ $options = $result->options;
 
 echo $parser->name . ' ' . $parser->version . PHP_EOL . PHP_EOL;
 
-
 // validate parameters
+if (!Phar::canWrite()) {
+    $parser->displayError("Phar writing support is disabled in this PHP installation, set phar.readonly=0 in php.ini!", 10);
+}
+
 if (substr($options['phar'], -5) !== '.phar') {
     $parser->displayError("Output must have .phar extension, {$options['phar']} given.", 2);
 }

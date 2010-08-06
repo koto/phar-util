@@ -13,10 +13,10 @@
   <email>kkotowicz@gmail.com</email>
   <active>yes</active>
  </lead>
- <date>2010-08-05</date>
+ <date>2010-08-06</date>
  <time>15:20:37</time>
  <version>
-  <release>0.1.0</release>
+  <release>0.2.0</release>
   <api>0.1</api>
  </version>
  <stability>
@@ -86,6 +86,15 @@
 	<tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
 	<tasks:replace from="@bin_dir@" to="bin_dir" type="pear-config" />
    </file>
+   <file name="phar-extract.php" role="script">
+    <tasks:replace from="/usr/bin/env php" to="php_bin" type="pear-config"/>
+    <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+    <tasks:replace from="@package_version@" to="version" type="package-info" />
+   </file>
+   <file name="phar-extract.bat" role="script">
+    <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+    <tasks:replace from="@bin_dir@" to="bin_dir" type="pear-config" />
+   </file>
    <file name="phar-generate-cert" role="script" />
   </dir>
  </contents>
@@ -106,6 +115,11 @@
     <name>Phar</name>
    </extension>
   </required>
+  <optional>
+   <extension>
+    <name>openssl</name>
+   </extension>
+  </optional>
  </dependencies>
  <phprelease>
   <installconditions>
@@ -116,15 +130,32 @@
   <filelist>
    <install as="phar-build" name="phar-build.php" />
    <install as="phar-build.bat" name="phar-build.bat" />
+   <install as="phar-extract" name="phar-extract.php" />
+   <install as="phar-extract.bat" name="phar-extract.bat" />
   </filelist>
  </phprelease>
  <phprelease>
   <filelist>
    <install as="phar-build" name="phar-build.php" />
+   <install as="phar-extract" name="phar-extract.php" />
    <ignore name="phar-build.bat" />
+   <ignore name="phar-extract.bat" />
   </filelist>
  </phprelease>
  <changelog>
+  <release>
+   <version>
+    <release>0.2</release>
+    <api>0.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2010-08-06</date>
+   <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
+   <notes>Added phar-extract toolset, small changes</notes>
+  </release>
   <release>
    <version>
     <release>0.1</release>
