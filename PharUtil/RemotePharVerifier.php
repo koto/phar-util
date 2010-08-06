@@ -160,13 +160,14 @@ class PharUtil_RemotePharVerifier {
             if (!copy($this->pub_key_file, $this->getPubkeyFilename($local_path))) {
                 throw new RuntimeException("Error copying public key file!");
             }
-            try {
-                $this->verifyPharSignature($local_path);
-            } catch (Exception $e) {
-                $this->doDelete($local_path); // delete offending files
-                throw $e;
-            }
         }
+        try {
+            $this->verifyPharSignature($local_path);
+        } catch (Exception $e) {
+            $this->doDelete($local_path); // delete offending files
+            throw $e;
+        }
+
         return true;
     }
 
@@ -228,7 +229,7 @@ class PharUtil_RemotePharVerifier {
             $sig = $phar->getSignature();
 
             unset($phar);
-            if ($sig['hash_type'] !== 'OpenSSL') {
+            if ($this->pub_key_file && $sig['hash_type'] !== 'OpenSSL') {
                 throw new PharUtil_SignatureVerificationException("This phar is not signed with OpenSSL!");
             }
         } catch (UnexpectedValueException $e) {

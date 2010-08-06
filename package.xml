@@ -16,7 +16,7 @@
  <date>2010-08-06</date>
  <time>15:20:37</time>
  <version>
-  <release>0.2.0</release>
+  <release>0.3.0</release>
   <api>0.1</api>
  </version>
  <stability>
@@ -49,6 +49,7 @@
                 <dir name="phar">
                     <file name="modified.phar" role="test" />
                     <file name="nosig.phar" role="test" />
+                    <file name="nosigmodified.phar" role="test" />
                     <file name="test.phar" role="test" />
                     <file name="test.phar.gz" role="test" />
                     <file name="wrongsig.phar" role="test" />
@@ -95,6 +96,15 @@
     <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
     <tasks:replace from="@bin_dir@" to="bin_dir" type="pear-config" />
    </file>
+   <file name="phar-verify.php" role="script">
+    <tasks:replace from="/usr/bin/env php" to="php_bin" type="pear-config"/>
+    <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+    <tasks:replace from="@package_version@" to="version" type="package-info" />
+   </file>
+   <file name="phar-verify.bat" role="script">
+    <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+    <tasks:replace from="@bin_dir@" to="bin_dir" type="pear-config" />
+   </file>
    <file name="phar-generate-cert" role="script" />
   </dir>
  </contents>
@@ -132,18 +142,35 @@
    <install as="phar-build.bat" name="phar-build.bat" />
    <install as="phar-extract" name="phar-extract.php" />
    <install as="phar-extract.bat" name="phar-extract.bat" />
+   <install as="phar-verify" name="phar-verify.php" />
+   <install as="phar-verify.bat" name="phar-verify.bat" />
   </filelist>
  </phprelease>
  <phprelease>
   <filelist>
    <install as="phar-build" name="phar-build.php" />
    <install as="phar-extract" name="phar-extract.php" />
+   <install as="phar-verify" name="phar-verify.php" />
    <ignore name="phar-build.bat" />
    <ignore name="phar-extract.bat" />
+   <ignore name="phar-verify.bat" />
   </filelist>
  </phprelease>
  <changelog>
   <release>
+  <release>
+   <version>
+    <release>0.3</release>
+    <api>0.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2010-08-06</date>
+   <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
+   <notes>Added phar-verify toolset, small changes</notes>
+  </release>
    <version>
     <release>0.2</release>
     <api>0.1</api>

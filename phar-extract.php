@@ -38,7 +38,6 @@ $parser->addArgument('phar', array(
     'description' => "Input Phar archive filename e.g. phar.phar",
 ));
 
-// add an option to make the program verbose
 $parser->addArgument('destination', array(
     'action'      => 'StoreString',
     'description' => "Destination directory"
@@ -104,7 +103,7 @@ try {
             throw new Exception("Phar writing support is disabled in this PHP installation, set phar.readonly=0 in php.ini!");
         }
         echo "Extracting {$files_count} file(s) to: {$args['destination']}..." . PHP_EOL;
-        $phar->ExtractTo($args['destination'], null, true);
+        $phar->extractTo($args['destination'], null, true);
     }
 
     if ($options['public']) {

@@ -20,7 +20,6 @@ $parser = new Console_CommandLine(array(
     'name'        => 'phar-build',
 ));
 
-// add an option to make the program verbose
 $parser->addOption('src', array(
     'short_name'  => '-s',
     'long_name'   => '--src',

@@ -104,10 +104,12 @@ class PharUtil_RemotePharVerifierTest extends PHPUnit_Framework_TestCase {
         }
         $this->fail("PharUtil_SignatureVerificationException was not thrown");
     }
+
     public function invalidFiles() {
         return array(
             array('wrongsig.phar'),
             array('nosig.phar'),
+            array('nosigmodified.phar'),
             array('modified.phar'),
             array('test.phar.gz'),
         );
@@ -120,7 +122,7 @@ class PharUtil_RemotePharVerifierTest extends PHPUnit_Framework_TestCase {
         $v->fetch($this->remote_dir . 'modified.phar');
     }
 
-    public function testNoPubkeyChecking() {
+    public function testNoPubkeyWillPassNotSignedPhars() {
         // no public key given
         $v = new PharUtil_RemotePharVerifier($this->fetch_dir, $this->verified_dir, null);
 
@@ -128,18 +130,39 @@ class PharUtil_RemotePharVerifierTest extends PHPUnit_Framework_TestCase {
         $this->assertFileExists($ok);
         $this->assertFileEquals($this->remote_dir . 'nosig.phar', $ok);
 
-        $ok = $v->fetch($this->remote_dir . 'wrongsig.phar');
-        $this->assertFileExists($ok);
-        $this->assertFileEquals($this->remote_dir . 'wrongsig.phar', $ok);
-
-        $ok = $v->fetch($this->remote_dir . 'modified.phar');
-        $this->assertFileExists($ok);
-        $this->assertFileEquals($this->remote_dir . 'modified.phar', $ok);
-
         // gzips are ok withot pubkey verification
         $ok = $v->fetch($this->remote_dir . 'test.phar.gz');
         $this->assertFileExists($ok);
         $this->assertFileEquals($this->remote_dir . 'test.phar.gz', $ok);
+    }
+
+    /**
+     * @dataProvider openSslFiles
+     */
+    public function testNoPubkeyWillErrorOnAllSignedPhars($file) {
+        // no public key given
+        $v = new PharUtil_RemotePharVerifier($this->fetch_dir, $this->verified_dir, null);
+
+        // this will pass (thankyou Phar :( )
+        $this->setExpectedException('PharUtil_SignatureVerificationException');
+        $ok = $v->fetch($this->remote_dir . $file);
+    }
+
+    public function openSslFiles() {
+        return array(
+            array('wrongsig.phar'),
+            array('modified.phar'),
+            array('test.phar'),
+        );
+    }
+
+    public function testNoPubkeyWillCheckOtherChecksums() {
+        // no public key given
+        $v = new PharUtil_RemotePharVerifier($this->fetch_dir, $this->verified_dir, null);
+
+        // simulate transfer error (SHA-1 checksum, but file is modified)
+        $this->setExpectedException('PharUtil_SignatureVerificationException');
+        $ok = $v->fetch($this->remote_dir . 'nosigmodified.phar');
     }
 
     /**
