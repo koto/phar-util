@@ -23,6 +23,7 @@ There are 3 command line utilities in this package:
 
 * **phar-build** for building and signing Phar archives (see `phar-build -h` for help)
 * **phar-extract** for extracting/listing contents of Phar archive (see `phar-extract -h` for help)
+* **phar-verify** for verifying signature of Phar archive (see `phar-verify -h` for help)
 * **phar-generate-cert** for generating OpenSSL certificates used to sign the Phar archives (OpenSSL installation is required)
 
 Installation
@@ -69,6 +70,9 @@ Usage
 
 #### Extracting a Phar archive
     $ phar-extract library.phar output-directory
+
+#### Verifying a Phar archive signature
+    $ phar-verify -P pub.pem http://example.com/library.phar
 
 #### List a Phar archive contents
     $ phar-extract -l library.phar output-directory
