@@ -92,9 +92,10 @@ class PharUtil_RemotePharVerifier {
     }
 
     /**
-     * Main method - downloads a Phar archive to a local directory and verifies its signature
+     * Downloads a Phar archive to a local directory and verifies its signature
+     * If it matches, the archive is copied to verified_dir.
      *
-     * @param string $phar_path Phar archive URI (file path, url, ...)
+     * @param string $phar_path Phar archive URI (e.g. /path/to/local/phar.phar or http://path/to/remote/phar.phar )
      * @param bool $overwrite should we overwrite already present local file?
      * @throws RuntimeException
      * @throws PharUtil_SignatureVerificationException
@@ -102,6 +103,7 @@ class PharUtil_RemotePharVerifier {
     public function fetch($phar_path, $overwrite = false) {
         $this->assertValidPharURI($phar_path);
         $local_path = $this->getLocalPath($phar_path);
+
         $dest_file = $this->verified_dir . DIRECTORY_SEPARATOR . $this->stripRandomness($local_path);
         if (file_exists($dest_file)) {
             if ($overwrite) {
@@ -116,23 +118,56 @@ class PharUtil_RemotePharVerifier {
             throw new RuntimeException("Error fetching file '$phar_path'!");
         }
 
+        $this->assertVerified($local_path);
+
+        // copy the file to verified dir
+        $local_path = $this->copyToVerified($local_path);
+
+        return realpath($local_path);
+    }
+
+    /**
+     * Downloads a Phar archive to a local directory and verifies its signature, without copying the file to verified directory
+     * @param string $phar_path Phar archive URI (e.g. /path/to/local/phar.phar or http://path/to/remote/phar.phar )
+     * @throws RuntimeException
+     * @throws PharUtil_SignatureVerificationException
+     * @return true
+     */
+    public function verify($phar_path) {
+        $this->assertValidPharURI($phar_path);
+        $local_path = $this->getLocalPath($phar_path);
+
+        // copy phar
+        if (!copy($phar_path, $local_path)) {
+            throw new RuntimeException("Error fetching file '$phar_path'!");
+        }
+
+        $this->assertVerified($local_path);
+
+        return true;
+    }
+
+    /**
+     * Verifies the local file
+     * @param bool $overwrite should we overwrite already present local file?
+     * @throws RuntimeException
+     * @throws PharUtil_SignatureVerificationException
+     * @return true
+     */
+    protected function assertVerified($local_path) {
         // copy pubkey
         if ($this->pub_key_file) {
             if (!copy($this->pub_key_file, $this->getPubkeyFilename($local_path))) {
                 throw new RuntimeException("Error copying public key file!");
             }
             try {
-                $this->verifyPharSignature($local_path, $phar_path);
+                $this->verifyPharSignature($local_path);
             } catch (Exception $e) {
                 $this->doDelete($local_path); // delete offending files
                 throw $e;
             }
         }
-
-        // copy the file to verified dir
-        $local_path = $this->copyToVerified($local_path);
-
-        return realpath($local_path);
+        return true;
     }
 
     /**
@@ -178,10 +213,9 @@ class PharUtil_RemotePharVerifier {
     /**
      * Verifies that a Phar archive has is OpenSSL-signed and the signature is valid
      * @param string path to Phar archive
-     * @param string path to remote Phar path (used in exceptions)
      * @throws SignatureVerificationException
      */
-    protected function verifyPharSignature($local_path, $phar_path) {
+    protected function verifyPharSignature($local_path) {
         try {
             // When public key is invalid, openssl throws a
             // 'supplied key param cannot be coerced into a public key' warning
@@ -195,7 +229,7 @@ class PharUtil_RemotePharVerifier {
 
             unset($phar);
             if ($sig['hash_type'] !== 'OpenSSL') {
-                throw new PharUtil_SignatureVerificationException("'$phar_path' is not signed with OpenSSL!");
+                throw new PharUtil_SignatureVerificationException("This phar is not signed with OpenSSL!");
             }
         } catch (UnexpectedValueException $e) {
             throw new PharUtil_SignatureVerificationException($e->getMessage());

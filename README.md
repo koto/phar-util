@@ -28,8 +28,10 @@ There are 3 command line utilities in this package:
 Installation
 ----------
 ### Dependencies
+* PHP >= 5.2.0
 * OpenSSL compiled into PHP (`--with-openssl`)
 * Phar 2.0.0
+* OpenSSL command-line utilities (for generating certificate)
 
 If you're using PHP >= 5.3.0, Phar is already bundled. For older versions
 you must build it from [pecl](http://pecl.php.net).
@@ -64,13 +66,12 @@ Usage
 * Create `src/` directory and copy all the files to build the archive from there
 * Build a signed phar archive
         $ phar-build --phar library.phar
-* Copy public key to a client
 
 #### Extracting a Phar archive
-        $ phar-extract library.phar output-directory
+    $ phar-extract library.phar output-directory
 
 #### List a Phar archive contents
-        $ phar-extract -l library.phar output-directory
+    $ phar-extract -l library.phar output-directory
 
 #### Using Phar archive
 

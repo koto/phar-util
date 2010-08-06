@@ -48,6 +48,71 @@ class PharUtil_RemotePharVerifierTest extends PHPUnit_Framework_TestCase {
         $v->fetch($this->remote_dir . 'wrongsig.phar');
     }
 
+    public function testVerifyDoesntCopyToVerifiedDir() {
+        $v = new PharUtil_RemotePharVerifier($this->fetch_dir, $this->verified_dir, $this->getPubKey());
+
+        $ok = $v->verify($this->remote_dir . 'test.phar');
+        $this->assertTrue($ok);
+        $this->assertFileNotExists($this->verified_dir . '/test.phar');
+    }
+
+    /**
+     * @dataProvider invalidFiles
+     */
+    public function testVerifyCorrectlyVerifies($file) {
+        $v = new PharUtil_RemotePharVerifier($this->fetch_dir, $this->verified_dir, $this->getPubKey());
+
+        try {
+            $v->verify($this->remote_dir . $file);
+        } catch(PharUtil_SignatureVerificationException $e) {
+            $this->assertFileNotExists($this->verified_dir . '/' . $file);
+            return;
+        }
+        $this->fail("PharUtil_SignatureVerificationException was not thrown");
+    }
+
+    /**
+     * @dataProvider invalidFiles
+     */
+    public function testVerifyCleansUpOnFailure($file) {
+        $v = new PharUtil_RemotePharVerifier($this->fetch_dir, $this->verified_dir, $this->getPubKey());
+
+        try {
+            $v->verify($this->remote_dir . $file);
+        } catch(PharUtil_SignatureVerificationException $e) {
+            $this->assertFileNotExists($this->verified_dir . '/' . $file);
+            $files = glob($this->fetch_dir . '/*');
+            $this->assertEquals(0, count($files));
+            return;
+        }
+        $this->fail("PharUtil_SignatureVerificationException was not thrown");
+    }
+
+    /**
+     * @dataProvider invalidFiles
+     */
+    public function testFetchCleansUpOnFailure($file) {
+        $v = new PharUtil_RemotePharVerifier($this->fetch_dir, $this->verified_dir, $this->getPubKey());
+
+        try {
+            $v->fetch($this->remote_dir . $file);
+        } catch(PharUtil_SignatureVerificationException $e) {
+            $this->assertFileNotExists($this->verified_dir . '/' . $file);
+            $files = glob($this->fetch_dir . '/*');
+            $this->assertEquals(0, count($files));
+            return;
+        }
+        $this->fail("PharUtil_SignatureVerificationException was not thrown");
+    }
+    public function invalidFiles() {
+        return array(
+            array('wrongsig.phar'),
+            array('nosig.phar'),
+            array('modified.phar'),
+            array('test.phar.gz'),
+        );
+    }
+
     public function testModifiedPharsAreInvalid() {
         $v = new PharUtil_RemotePharVerifier($this->fetch_dir, $this->verified_dir, $this->getPubKey());
 
@@ -55,7 +120,7 @@ class PharUtil_RemotePharVerifierTest extends PHPUnit_Framework_TestCase {
         $v->fetch($this->remote_dir . 'modified.phar');
     }
 
-    public function testSkippedPubkeyChecking() {
+    public function testNoPubkeyChecking() {
         // no public key given
         $v = new PharUtil_RemotePharVerifier($this->fetch_dir, $this->verified_dir, null);
 
@@ -99,7 +164,7 @@ class PharUtil_RemotePharVerifierTest extends PHPUnit_Framework_TestCase {
 
         $ok = $v->fetch($this->remote_dir . 'test.phar');
         $this->assertFileExists($ok);
-        //$this->assertFileEquals($ok, $this->remote_dir . '/test.phar');
+        $this->assertFileEquals($ok, $this->remote_dir . '/test.phar');
         $this->assertEquals($this->verified_dir . '/test.phar', $ok);
     }
 
