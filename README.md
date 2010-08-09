@@ -30,7 +30,7 @@ Installation
 ----------
 ### Dependencies
 * PHP >= 5.2.0
-* OpenSSL compiled into PHP (`--with-openssl`)
+* OpenSSL compiled into PHP (`--with-openssl`) - windows users please consult [PHP manual](http://www.php.net/manual/en/openssl.installation.php)
 * Phar 2.0.0
 
 If you're using PHP >= 5.3.0, Phar is already bundled. For older versions

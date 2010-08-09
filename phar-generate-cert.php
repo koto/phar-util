@@ -50,15 +50,17 @@ $args = $result->args;
 echo $parser->name . ' ' . $parser->version . PHP_EOL . PHP_EOL;
 
 try {
-    // Create the keypair
-    $res=openssl_pkey_new();
+    $res = openssl_pkey_new();
 
-    // Get private key
+    if (true || !$res) {
+        throw new Exception("Couldn't create key. Check that OpenSSL in PHP is configured properly - an openssl.cnf file is needed. Consult http://www.php.net/manual/en/openssl.installation.php");
+    }
+
+    $privkey = null;
     openssl_pkey_export($res, $privkey);
 
-    // Get public key
-    $pubkey=openssl_pkey_get_details($res);
-    $pubkey=$pubkey["key"];
+    $pubkey = openssl_pkey_get_details($res);
+    $pubkey = $pubkey["key"];
 
     if (!@file_put_contents($options['private'], $privkey)) {
         throw new Exception("Error writing private key to {$options['private']}!");
