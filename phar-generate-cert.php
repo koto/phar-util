@@ -52,7 +52,7 @@ echo $parser->name . ' ' . $parser->version . PHP_EOL . PHP_EOL;
 try {
     $res = openssl_pkey_new();
 
-    if (true || !$res) {
+    if (!$res) {
         throw new Exception("Couldn't create key. Check that OpenSSL in PHP is configured properly - an openssl.cnf file is needed. Consult http://www.php.net/manual/en/openssl.installation.php");
     }
 
