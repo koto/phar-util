@@ -19,10 +19,12 @@ PEAR channel server: [pear.kotowicz.net](http://pear.kotowicz.net)
 
 Command line utilties
 ---------------------
-* **phar-build** for building and signing Phar archives (see `phar-build -h` for help)
-* **phar-extract** for extracting/listing contents of Phar archive (see `phar-extract -h` for help)
-* **phar-verify** for verifying signature of Phar archive (see `phar-verify -h` for help)
-* **phar-generate-cert** for generating OpenSSL certificates used to sign the Phar archives (OpenSSL installation is required)
+* **phar-build** for building and signing Phar archives
+* **phar-extract** for extracting/listing contents of Phar archive
+* **phar-verify** for verifying signature of Phar archive
+* **phar-generate-cert** for generating OpenSSL certificates used to sign the Phar archives
+
+All scripts support `-h` command line parameter to display their usage.
 
 Installation
 ----------
@@ -30,7 +32,6 @@ Installation
 * PHP >= 5.2.0
 * OpenSSL compiled into PHP (`--with-openssl`)
 * Phar 2.0.0
-* OpenSSL command-line utilities (for generating certificate)
 
 If you're using PHP >= 5.3.0, Phar is already bundled. For older versions
 you must build it from [pecl](http://pecl.php.net).
