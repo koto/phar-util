@@ -13,10 +13,9 @@
   <email>kkotowicz@gmail.com</email>
   <active>yes</active>
  </lead>
- <date>2010-08-06</date>
- <time>15:20:37</time>
+ <date>2010-08-09</date>
  <version>
-  <release>0.4.0</release>
+  <release>0.5.0</release>
   <api>0.1</api>
  </version>
  <stability>
@@ -24,7 +23,7 @@
   <api>beta</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
- <notes>First release</notes>
+ <notes>phar-generate-cert is now rewritten in php</notes>
  <contents>
   <dir name="/">
    <file name="LICENSE" role="data" />
@@ -105,13 +104,21 @@
     <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
     <tasks:replace from="@bin_dir@" to="bin_dir" type="pear-config" />
    </file>
-   <file name="phar-generate-cert" role="script" />
+   <file name="phar-generate-cert.php" role="script">
+    <tasks:replace from="/usr/bin/env php" to="php_bin" type="pear-config"/>
+    <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+    <tasks:replace from="@package_version@" to="version" type="package-info" />
+   </file>
+   <file name="phar-generate-cert.bat" role="script">
+    <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+    <tasks:replace from="@bin_dir@" to="bin_dir" type="pear-config" />
+   </file>
   </dir>
  </contents>
  <dependencies>
   <required>
    <php>
-    <min>5.2.0</min>
+    <min>5.2.1</min>
    </php>
    <pearinstaller>
     <min>1.4.0</min>
@@ -144,6 +151,8 @@
    <install as="phar-extract.bat" name="phar-extract.bat" />
    <install as="phar-verify" name="phar-verify.php" />
    <install as="phar-verify.bat" name="phar-verify.bat" />
+   <install as="phar-generate-cert" name="phar-generate-cert.php" />
+   <install as="phar-generate-cert.bat" name="phar-generate-cert.bat" />
   </filelist>
  </phprelease>
  <phprelease>
@@ -151,12 +160,27 @@
    <install as="phar-build" name="phar-build.php" />
    <install as="phar-extract" name="phar-extract.php" />
    <install as="phar-verify" name="phar-verify.php" />
+   <install as="phar-generate-cert" name="phar-generate-cert.php" />
    <ignore name="phar-build.bat" />
    <ignore name="phar-extract.bat" />
    <ignore name="phar-verify.bat" />
+   <ignore name="phar-generate-cert.bat" />
   </filelist>
  </phprelease>
  <changelog>
+  <release>
+   <version>
+    <release>0.5.0</release>
+    <api>0.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2010-08-09</date>
+   <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
+   <notes>phar-generate-cert is now rewritten in php</notes>
+  </release>
   <release>
    <version>
     <release>0.4</release>
