@@ -85,8 +85,6 @@ if ($options['public']) {
     }
 }
 
-$dest = $options['phar'];
-
 try {
     echo "Opening Phar archive: {$args['phar']}..." . PHP_EOL;
     $phar = new Phar($args['phar']);
