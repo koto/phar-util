@@ -28,6 +28,13 @@ $parser->addOption('src', array(
     'description' => "Source files directory\n(./src)"
 ));
 
+$parser->addOption('stub', array(
+    'short_name'  => '-S',
+    'long_name'   => '--stub',
+    'action'      => 'StoreString',
+    'default'     => './stub.php',
+    'description' => "(optional) stub file for phar \n(./stub.php)\nIf stub file does not exist, default stub will be used."
+));
 $parser->addOption('exclude_files', array(
     'short_name'  => '-x',
     'long_name'   => '--exclude',
@@ -86,6 +93,10 @@ $options = $result->options;
 echo $parser->name . ' ' . $parser->version . PHP_EOL . PHP_EOL;
 
 // validate parameters
+if (!class_exists('Phar')) {
+    $parser->displayError("No Phar support found, you need to build and enable Phar extension. Exiting...", 10);
+}
+
 if (!Phar::canWrite()) {
     $parser->displayError("Phar writing support is disabled in this PHP installation, set phar.readonly=0 in php.ini!", 10);
 }
@@ -101,6 +112,13 @@ if (!$options['nosign']) {
 
     if (!file_exists($options['public']) || !is_readable($options['public'])) {
         $parser->displayError("Public key in '{$options['public']}' does not exist or is not readable.", 4);
+    }
+}
+
+if ($options['stub']) {
+    if (!file_exists($options['stub']) || !is_readable($options['stub'])) {
+        // ignore stub file
+        $options['stub'] = null;
     }
 }
 
@@ -150,6 +168,11 @@ try {
 
     // unfortunately Phar disables openssl signing for compressed archives
     // $phar->compress(PHAR::GZ);
+
+    if ($options['stub']) {
+        echo "Setting stub from {$options['stub']}" . PHP_EOL;
+        $phar->setStub(file_get_contents($options['stub']));
+    }
 
     if (!$options['nosign']) {
         // apply the signature
