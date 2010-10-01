@@ -158,7 +158,7 @@ try {
         if ($file->isFile()) {
             $phar->addFile($file, str_replace($options['src'], '', $file));
         }
-        if ($file->isDir()) {
+        if ($file->isDir() && !$file->isDot()) {
             // this also doesn't work :(
             $phar->addEmptyDir(str_replace($options['src'], '', $file));
         }
