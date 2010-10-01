@@ -13,9 +13,9 @@
   <email>kkotowicz@gmail.com</email>
   <active>yes</active>
  </lead>
- <date>2010-08-11</date>
+ <date>2010-10-01</date>
  <version>
-  <release>0.5.2</release>
+  <release>0.5.3</release>
   <api>0.1</api>
  </version>
  <stability>
@@ -23,7 +23,7 @@
   <api>beta</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
- <notes>bugfix for php bin installed in directory with spaces on win32</notes>
+ <notes>bugfix for phar-build (sometimes . and .. were incorrectly tried to be added in Phar)</notes>
  <contents>
   <dir name="/">
    <file name="LICENSE" role="data" />
