@@ -13,9 +13,9 @@
   <email>kkotowicz@gmail.com</email>
   <active>yes</active>
  </lead>
- <date>2010-10-01</date>
+ <date>2010-10-03</date>
  <version>
-  <release>0.5.3</release>
+  <release>0.5.4</release>
   <api>0.1</api>
  </version>
  <stability>
@@ -23,7 +23,9 @@
   <api>beta</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
- <notes>bugfix for phar-build (sometimes . and .. were incorrectly tried to be added in Phar)</notes>
+ <notes>
+ Fixed issues #1 and #2 @github (thanks Obsidian1510 for reporting)
+ </notes>
  <contents>
   <dir name="/">
    <file name="LICENSE" role="data" />
