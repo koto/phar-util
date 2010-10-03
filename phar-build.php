@@ -191,6 +191,7 @@ try {
 } catch (Exception $e) {
     @unlink($dest);
     echo "Error: " . $e->getMessage() . "\n";
+    exit(1);
 }
 
 class ExcludeFilesIterator extends FilterIterator {
