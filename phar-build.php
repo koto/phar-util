@@ -74,6 +74,13 @@ $parser->addOption('nosign', array(
     'description' => 'Don\'t sign the Phar archive'
 ));
 
+$parser->addOption('quiet', array(
+    'short_name'   => '-q',
+    'long_name'   => '--quiet',
+    'action'      => 'StoreTrue',
+    'description' => 'Suppress most of the output statements.'
+));
+
 $parser->addOption('phar', array(
     'long_name'   => '--phar',
     'action'      => 'StoreString',
@@ -90,7 +97,17 @@ try {
 
 $options = $result->options;
 
-echo $parser->name . ' ' . $parser->version . PHP_EOL . PHP_EOL;
+// Use a constant to avoid globals.
+if($options['quiet']) {
+    define('QUIET_MODE', true);
+} else {
+    define('QUIET_MODE', false);
+}
+
+if (!QUIET_MODE) {
+    echo $parser->name . ' ' . $parser->version . PHP_EOL . PHP_EOL;
+}
+
 
 // validate parameters
 if (!class_exists('Phar')) {
@@ -126,7 +143,9 @@ if (!is_dir($options['src']) || !is_readable($options['src'])) {
     $parser->displayError("Source directory in '{$options['src']}' does not exist or is not readable.\n,", 5);
 }
 
-echo "Building Phar archive from {$options['src']}..." . PHP_EOL;
+if (!QUIET_MODE) {
+    echo "Building Phar archive from {$options['src']}..." . PHP_EOL;
+}
 
 $dest = $options['phar'];
 
@@ -154,7 +173,9 @@ try {
 
     // buildFromIterator unfortunately sucks and skips nested directories (?)
     foreach ($iterator as $file) {
-        echo "adding " . $file . PHP_EOL;
+        if(!QUIET_MODE) {
+            echo "adding " . $file . PHP_EOL;
+        }
         if ($file->isFile()) {
             $phar->addFile($file, str_replace($options['src'], '', $file));
         }
@@ -170,23 +191,31 @@ try {
     // $phar->compress(PHAR::GZ);
 
     if ($options['stub']) {
-        echo "Setting stub from {$options['stub']}" . PHP_EOL;
+        if(!QUIET_MODE) {
+            echo "Setting stub from {$options['stub']}" . PHP_EOL;
+        }
         $phar->setStub(file_get_contents($options['stub']));
     }
 
     if (!$options['nosign']) {
         // apply the signature
-        echo "Signing the archive with '$priv_file'." . PHP_EOL;
+        if(!QUIET_MODE) {
+            echo "Signing the archive with '$priv_file'." . PHP_EOL;
+        }
         $phar->setSignatureAlgorithm(Phar::OPENSSL, $private_key);
 
         // attach the public key for verification
         if (!copy($pub_file, $options['phar'] . '.pubkey')) {
-            echo "Attaching public key file." . PHP_EOL;
+            if(!QUIET_MODE) {
+                echo "Attaching public key file." . PHP_EOL;
+            }
             throw new RuntimeException('Could not copy public key!');
         }
     }
 
-    echo PHP_EOL . "{$options['phar']} created, exiting." . PHP_EOL;
+    if (!QUIET_MODE) {
+        echo PHP_EOL . "{$options['phar']} created, exiting." . PHP_EOL;
+    }
 
 } catch (Exception $e) {
     @unlink($dest);
@@ -215,7 +244,9 @@ class ExcludeFilesIterator extends FilterIterator {
         if ($file->isFile()) {
             foreach ($this->exclude_file as $pattern) {
                 if (preg_match($pattern, $file->getFilename())) {
-                    echo "skipping $file\n";
+                    if(!QUIET_MODE) {
+                        echo "skipping $file\n";
+                    }
                     return false;
                 }
             }
@@ -223,7 +254,9 @@ class ExcludeFilesIterator extends FilterIterator {
 
         foreach ($this->exclude_path as $pattern) {
             if (preg_match($pattern, $file->getPathname())) {
-                echo "skipping $file\n";
+                if(!QUIET_MODE) {
+                    echo "skipping $file\n";
+                }
                 return false;
             }
         }
