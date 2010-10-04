@@ -101,7 +101,7 @@ echo $parser->name . ' ' . $parser->version . PHP_EOL . PHP_EOL;
 
 // Use a constant to avoid globals.
 if($options['quiet']) {
-	define('QUIET_MODE', true);
+    define('QUIET_MODE', true);
 }
 
 // validate parameters
@@ -166,9 +166,9 @@ try {
 
     // buildFromIterator unfortunately sucks and skips nested directories (?)
     foreach ($iterator as $file) {
-		if(!defined('QUIET_MODE')) {
-			echo "adding " . $file . PHP_EOL;
-		}
+        if(!defined('QUIET_MODE')) {
+            echo "adding " . $file . PHP_EOL;
+        }
         if ($file->isFile()) {
             $phar->addFile($file, str_replace($options['src'], '', $file));
         }
@@ -184,24 +184,24 @@ try {
     // $phar->compress(PHAR::GZ);
 
     if ($options['stub']) {
-		if(!defined('QUIET_MODE')) {
-			echo "Setting stub from {$options['stub']}" . PHP_EOL;
-		}
+        if(!defined('QUIET_MODE')) {
+            echo "Setting stub from {$options['stub']}" . PHP_EOL;
+        }
         $phar->setStub(file_get_contents($options['stub']));
     }
 
     if (!$options['nosign']) {
         // apply the signature
-		if(!defined('QUIET_MODE')) {
-			echo "Signing the archive with '$priv_file'." . PHP_EOL;
-		}
+        if(!defined('QUIET_MODE')) {
+            echo "Signing the archive with '$priv_file'." . PHP_EOL;
+        }
         $phar->setSignatureAlgorithm(Phar::OPENSSL, $private_key);
 
         // attach the public key for verification
         if (!copy($pub_file, $options['phar'] . '.pubkey')) {
-			if(!defined('QUIET_MODE')) {
-				echo "Attaching public key file." . PHP_EOL;
-			}
+            if(!defined('QUIET_MODE')) {
+                echo "Attaching public key file." . PHP_EOL;
+            }
             throw new RuntimeException('Could not copy public key!');
         }
     }
@@ -234,9 +234,9 @@ class ExcludeFilesIterator extends FilterIterator {
         if ($file->isFile()) {
             foreach ($this->exclude_file as $pattern) {
                 if (preg_match($pattern, $file->getFilename())) {
-					if(!defined('QUIET_MODE')) {
-						echo "skipping $file\n";
-					}
+                    if(!defined('QUIET_MODE')) {
+                        echo "skipping $file\n";
+                    }
                     return false;
                 }
             }
@@ -244,9 +244,9 @@ class ExcludeFilesIterator extends FilterIterator {
 
         foreach ($this->exclude_path as $pattern) {
             if (preg_match($pattern, $file->getPathname())) {
-				if(!defined('QUIET_MODE')) {
-					echo "skipping $file\n";
-				}
+                if(!defined('QUIET_MODE')) {
+                    echo "skipping $file\n";
+                }
                 return false;
             }
         }
