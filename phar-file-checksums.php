@@ -149,7 +149,7 @@ try {
 	}
 	catch(Exception $e) {
 		// Dump our file of checksums now, so that we can use it later.
-		if (!((bool) $options['nowrite_checksums'])) {
+		if (empty($options['nowrite_checksums'])) {
 			file_put_contents($options['checksum_file'], json_encode($checksums));
 		}
 		if (!QUIET_MODE) {
