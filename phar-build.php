@@ -98,11 +98,7 @@ try {
 $options = $result->options;
 
 // Use a constant to avoid globals.
-if($options['quiet']) {
-    define('QUIET_MODE', true);
-} else {
-    define('QUIET_MODE', false);
-}
+define('QUIET_MODE', ((bool) $options['quiet']));
 
 if (!QUIET_MODE) {
     echo $parser->name . ' ' . $parser->version . PHP_EOL . PHP_EOL;
