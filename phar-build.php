@@ -153,12 +153,13 @@ try {
       unlink($file);
     $phar = new Phar($options['phar']);
 
-    // get the private key
-    $private_key = file_get_contents($priv_file);
-    if (!$private_key) {
-        throw new Exception("Could not load private key from '$priv_file'!");
+    if (!$options['nosign']) {
+        // get the private key
+        $private_key = file_get_contents($priv_file);
+        if (!$private_key) {
+            throw new Exception("Could not load private key from '$priv_file'!");
+        }
     }
-
     $iterator = new RecursiveDirectoryIterator($options['src']);
 
     $iterator = new RecursiveIteratorIterator($iterator, RecursiveIteratorIterator::SELF_FIRST);
