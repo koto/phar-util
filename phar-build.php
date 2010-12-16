@@ -170,15 +170,17 @@ try {
 
     // buildFromIterator unfortunately sucks and skips nested directories (?)
     foreach ($iterator as $file) {
-        if(!QUIET_MODE) {
-            echo "adding " . $file . PHP_EOL;
-        }
-        if ($file->isFile()) {
-            $phar->addFile($file, str_replace($options['src'], '', $file));
-        }
-        if ($file->isDir() && !$iterator->isDot()) {
-            // this also doesn't work :(
-            $phar->addEmptyDir(str_replace($options['src'], '', $file));
+        if (!$iterator->isDot()) {
+            if(!QUIET_MODE) {
+                echo "adding " . $file . PHP_EOL;
+            }
+            if ($file->isFile()) {
+                $phar->addFile($file, strip_from_beginning($options['src'], $file));
+            }
+            if ($file->isDir()) {
+                // this also doesn't work :(
+                $phar->addEmptyDir(strip_from_beginning($options['src'], $file));
+            }
         }
     }
 
@@ -218,6 +220,13 @@ try {
     @unlink($dest);
     echo "Error: " . $e->getMessage() . "\n";
     exit(1);
+}
+
+function strip_from_beginning($needle, $haystack) {
+    if (strpos($haystack, $needle) !== 0) // not in the beginning/not found
+        return $haystack;
+
+    return substr($haystack, strlen($needle));
 }
 
 class ExcludeFilesIterator extends FilterIterator {
