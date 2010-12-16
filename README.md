@@ -23,6 +23,7 @@ Command line utilties
 * **phar-extract** for extracting/listing contents of Phar archive
 * **phar-verify** for verifying signature of Phar archive
 * **phar-generate-cert** for generating OpenSSL certificates used to sign the Phar archives
+* **phar-file-checksums** for generating / checking files checksum to see if Phar archive is up-to-date with source files
 
 All scripts support `-h` command line parameter to display their usage.
 
@@ -81,6 +82,13 @@ Usage
 Just use it like a normal Phar archive
 
     include_once 'phar://path/to/library.phar';
+
+Using Phar-util in a build script
+---------------------------------
+Thanks to Damian Bushong <stratosphere dot programming at gmail dot com>, Phar-Util now comes with
+a script used to generate file checksums in Phar archive and compare them with source file checksums
+to see if a Phar archive needs to be rebuilt. Thanks to using exit codes this can be easily used
+in your app build scripts. Use `phar-file-checksums --help` command for instructions.
 
 Secure remote code deployment with PharUtil
 -------------------------------------------
