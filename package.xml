@@ -15,7 +15,7 @@
  </lead>
  <date>2010-12-16</date>
  <version>
-  <release>0.5.6</release>
+  <release>0.5.7</release>
   <api>0.1</api>
  </version>
  <stability>
@@ -165,6 +165,8 @@
    <install as="phar-verify.bat" name="phar-verify.bat" />
    <install as="phar-generate-cert" name="phar-generate-cert.php" />
    <install as="phar-generate-cert.bat" name="phar-generate-cert.bat" />
+   <install as="phar-file-checksums" name="phar-file-checksums.php" />
+   <install as="phar-file-checksums.bat" name="phar-file-checksums.bat" />
   </filelist>
  </phprelease>
  <phprelease>
@@ -173,10 +175,12 @@
    <install as="phar-extract" name="phar-extract.php" />
    <install as="phar-verify" name="phar-verify.php" />
    <install as="phar-generate-cert" name="phar-generate-cert.php" />
+   <install as="phar-file-checksums" name="phar-file-checksums.php" />
    <ignore name="phar-build.bat" />
    <ignore name="phar-extract.bat" />
    <ignore name="phar-verify.bat" />
    <ignore name="phar-generate-cert.bat" />
+   <ignore name="phar-file-checksums.bat" />
   </filelist>
  </phprelease>
  <changelog>
