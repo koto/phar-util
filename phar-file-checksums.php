@@ -161,9 +161,9 @@ try {
         }
     }
 
+    exit(0);
     if (!QUIET_MODE) {
         echo "Rebuild not required.\n";
-        exit(0);
     }
 
 } catch (Exception $e) {
