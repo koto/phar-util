@@ -163,8 +163,8 @@ try {
 
     if (!QUIET_MODE) {
         echo "Rebuild not required.\n";
-        exit(0);
     }
+    exit(0);
 
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage() . "\n";
