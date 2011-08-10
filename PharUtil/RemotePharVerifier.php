@@ -1,5 +1,7 @@
 <?php
-require_once 'PharUtil/SignatureVerificationException.php';
+if(!class_exists('PharUtil_SignatureVerificationException', false) {
+    require_once 'PharUtil/SignatureVerificationException.php';
+}
 
 /**
  * Downloads remote signed Phar archives to local directory and assigns
