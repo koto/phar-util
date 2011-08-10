@@ -40,19 +40,28 @@ $parser->addArgument('phar', array(
 
 $parser->addArgument('destination', array(
     'action'      => 'StoreString',
-    'description' => "Destination directory"
+    'description' => "Destination directory",
+    'optional'    => true
 ));
 
 
 // run the parser
 try {
     $result = $parser->parse();
+    $options = $result->options;
+    $args = $result->args;
+    if ($options['list'] !== true && !isset($args['destination'])) {
+        throw Console_CommandLine_Exception::factory(
+            'ARGUMENT_REQUIRED',
+            array('argnum' => 2, 'plural' => 's'),
+            $parser,
+            $parser->messages
+        );
+    }
 } catch (Exception $exc) {
     $parser->displayError($exc->getMessage());
 }
 
-$options = $result->options;
-$args = $result->args;
 
 echo $parser->name . ' ' . $parser->version . PHP_EOL . PHP_EOL;
 
