@@ -151,7 +151,7 @@ class PharUtil_RemotePharVerifier {
 
     /**
      * Verifies the local file
-     * @param bool $overwrite should we overwrite already present local file?
+     * @param string $local_path path to Phar archive
      * @throws RuntimeException
      * @throws PharUtil_SignatureVerificationException
      * @return true
