@@ -17,7 +17,7 @@ Source code: [github](http://github.com/koto/phar-util)
 
 PEAR channel server: [pear.kotowicz.net](http://pear.kotowicz.net)
 
-Command line utilties
+Command line utilities
 ---------------------
 * **phar-build** for building and signing Phar archives
 * **phar-extract** for extracting/listing contents of Phar archive
