@@ -80,6 +80,12 @@ $parser->addOption('quiet', array(
     'action'      => 'StoreTrue',
     'description' => 'Suppress most of the output statements.'
 ));
+$parser->addOption('stripcomments', array(
+    'long_name'   => '--strip-files',
+    'action'      => 'StoreString',
+    'default'     => '',
+    'description' => "(optional) Space separated regular expressions of filenames that should have comments and whitespace stripped \n(\".php$\" is recommended)"
+));
 
 $parser->addOption('phar', array(
     'long_name'   => '--phar',
@@ -128,6 +134,12 @@ if (!$options['nosign']) {
     }
 }
 
+$strip_regex = NULL;
+if ($options['stripcomments']){
+    $strip_regex = $options['stripcomments'];
+	$strip_regex = array_map('makeRegExp', preg_split("/ +/", $strip_regex, -1, PREG_SPLIT_NO_EMPTY));
+}
+
 if ($options['stub']) {
     if (!file_exists($options['stub']) || !is_readable($options['stub'])) {
         // ignore stub file
@@ -171,10 +183,28 @@ try {
     // buildFromIterator unfortunately sucks and skips nested directories (?)
     foreach ($iterator as $file) {
         if (!$iterator->isDot()) {
-            if(!QUIET_MODE) {
-                echo "adding " . $file . PHP_EOL;
-            }
             if ($file->isFile()) {
+                if($strip_regex !== NULL) {
+                    foreach ($strip_regex as $pattern) {
+                        if (preg_match($pattern, $file->getFilename())) {
+                            if(!QUIET_MODE) {
+                                echo "adding " . $file . " and stripping whitespace+comments" . PHP_EOL;
+                            }
+                            $phar->addFromString(strip_from_beginning($options['src'], $file), php_strip_whitespace($file->getFilename()));
+                        } else {
+                            if(!QUIET_MODE) {
+                                echo "adding " . $file . PHP_EOL;
+                            }
+                            $phar->addFile($file, strip_from_beginning($options['src'], $file));
+                        }
+                    }
+                } else {
+                    if(!QUIET_MODE) {
+                        echo "adding " . $file . PHP_EOL;
+                    }
+                    $phar->addFile($file, strip_from_beginning($options['src'], $file));
+                }
+
                 $phar->addFile($file, strip_from_beginning($options['src'], $file));
             }
             if ($file->isDir()) {
@@ -229,20 +259,20 @@ function strip_from_beginning($needle, $haystack) {
     return substr($haystack, strlen($needle));
 }
 
+function makeRegExp($pattern) {
+    return '!' . $pattern . '!';
+}
+
 class ExcludeFilesIterator extends FilterIterator {
     protected $exclude_file;
     protected $exclude_path;
 
     public function __construct(Iterator $i, $exclude_file, $exclude_path) {
         parent::__construct($i);
-        $exclude_file = array_map(array($this, 'makeRegExp'), preg_split("/ +/", $exclude_file, -1, PREG_SPLIT_NO_EMPTY));
-        $exclude_path = array_map(array($this, 'makeRegExp'), preg_split("/ +/", $exclude_path, -1, PREG_SPLIT_NO_EMPTY));
+        $exclude_file = array_map('makeRegExp', preg_split("/ +/", $exclude_file, -1, PREG_SPLIT_NO_EMPTY));
+        $exclude_path = array_map('makeRegExp', preg_split("/ +/", $exclude_path, -1, PREG_SPLIT_NO_EMPTY));
         $this->exclude_file = $exclude_file;
         $this->exclude_path = $exclude_path;
-    }
-
-    protected function makeRegExp($pattern) {
-        return '!' . $pattern . '!';
     }
 
     public function accept() {
