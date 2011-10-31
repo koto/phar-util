@@ -188,7 +188,7 @@ try {
                     foreach ($strip_regex as $pattern) {
                         if (preg_match($pattern, $file->getFilename())) {
                             if(!QUIET_MODE) {
-                                echo "adding " . $file . " and stripping whitespace+comments" . PHP_EOL;
+                                echo "adding " . $file . " and stripping whitespace & comments" . PHP_EOL;
                             }
                             $phar->addFromString(strip_from_beginning($options['src'], $file), php_strip_whitespace($file->getFilename()));
                         } else {
