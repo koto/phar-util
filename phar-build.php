@@ -185,18 +185,23 @@ try {
         if (!$iterator->isDot()) {
             if ($file->isFile()) {
                 if($strip_regex !== NULL) {
+                    $strip_match = false;
                     foreach ($strip_regex as $pattern) {
                         if (preg_match($pattern, $file->getFilename())) {
-                            if(!QUIET_MODE) {
-                                echo "adding " . $file . " and stripping whitespace & comments" . PHP_EOL;
-                            }
-                            $phar->addFromString(strip_from_beginning($options['src'], $file), php_strip_whitespace($file->getFilename()));
-                        } else {
-                            if(!QUIET_MODE) {
-                                echo "adding " . $file . PHP_EOL;
-                            }
-                            $phar->addFile($file, strip_from_beginning($options['src'], $file));
+                            $strip_match = true;
+                            break;
                         }
+                    }
+                    if ($strip_match) {
+                        if(!QUIET_MODE) {
+                            echo "adding " . $file . " and stripping whitespace & comments" . PHP_EOL;
+                        }
+                        $phar->addFromString(strip_from_beginning($options['src'], $file), php_strip_whitespace((string) $file));
+                    } else {
+                        if(!QUIET_MODE) {
+                            echo "adding " . $file . PHP_EOL;
+                        }
+                        $phar->addFile($file, strip_from_beginning($options['src'], $file));
                     }
                 } else {
                     if(!QUIET_MODE) {
@@ -204,8 +209,6 @@ try {
                     }
                     $phar->addFile($file, strip_from_beginning($options['src'], $file));
                 }
-
-                $phar->addFile($file, strip_from_beginning($options['src'], $file));
             }
             if ($file->isDir()) {
                 // this also doesn't work :(
