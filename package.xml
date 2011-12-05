@@ -13,9 +13,10 @@
   <email>kkotowicz@gmail.com</email>
   <active>yes</active>
  </lead>
- <date>2010-12-16</date>
+ 
+ <date>2011-12-05</date>
  <version>
-  <release>0.5.7</release>
+  <release>0.6.0</release>
   <api>0.1</api>
  </version>
  <stability>
@@ -24,7 +25,9 @@
  </stability>
  <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
  <notes>
- Fixed issues #1 and #2 @github (thanks Obsidian1510 for reporting)
+ - smarter require_once() calls by damianb (issue #10)
+ - phar-extract -l $file without destination directory by cweiske (issue #11)
+ - comment/whitespace stripping feature by damianb (issue #14)
  </notes>
  <contents>
   <dir name="/">
