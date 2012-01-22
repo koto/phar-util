@@ -54,6 +54,7 @@ This step is optional (and discouraged) if you will only be reading Phar archive
 ### Install the package
 
 Install the library through PEAR installer:
+
     $ sudo pear channel-discover pear.kotowicz.net
     $ sudo pear install kotowicz/PharUtil-beta
 

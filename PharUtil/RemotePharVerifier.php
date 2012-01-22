@@ -1,5 +1,5 @@
 <?php
-if(!class_exists('PharUtil_SignatureVerificationException', false) {
+if(!class_exists('PharUtil_SignatureVerificationException', false)) {
     require_once 'PharUtil/SignatureVerificationException.php';
 }
 
