@@ -14,9 +14,9 @@
   <active>yes</active>
  </lead>
  
- <date>2011-12-05</date>
+ <date>2012-01-22</date>
  <version>
-  <release>0.6.0</release>
+  <release>0.6.1</release>
   <api>0.1</api>
  </version>
  <stability>
@@ -25,9 +25,7 @@
  </stability>
  <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
  <notes>
- - smarter require_once() calls by damianb (issue #10)
- - phar-extract -l $file without destination directory by cweiske (issue #11)
- - comment/whitespace stripping feature by damianb (issue #14)
+ - issue #16 fixed (error in condition in file RemotePharVerifier)
  </notes>
  <contents>
   <dir name="/">
